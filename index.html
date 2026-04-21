@@ -3,605 +3,716 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Vocab Master - Pro Edition</title>
-    <!-- Libraries -->
+    <title>Luyện Từ Vựng TOEIC Master</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- PDF.js for reading PDF files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; }
+        /* Custom Styles for Flip Card */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
         
-        /* Flashcard Flip Animation */
         .flashcard-inner {
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
             transform-style: preserve-3d;
         }
+        
         .flashcard.flipped .flashcard-inner {
             transform: rotateY(180deg);
         }
-        .flashcard-front, .flashcard-back {
-            backface-visibility: hidden;
-            border-radius: 2.5rem;
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2.5rem;
-        }
-        .flashcard-back {
-            transform: rotateY(180deg);
-            background-color: #4f46e5;
-            color: white;
-        }
-        .flashcard-front {
-            background-color: white;
-            border: 1px solid #e2e8f0;
-        }
-        .perspective-1000 { perspective: 1000px; }
 
-        /* Answer Feedback */
-        .option-btn.correct { border-color: #10b981 !important; background-color: #ecfdf5 !important; color: #065f46 !important; }
-        .option-btn.wrong { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #991b1b !important; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px;}
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
         }
-        .animate-shake { animation: shake 0.2s ease-in-out 2; }
-
-        /* Loader */
-        .loader-ring {
-            width: 48px;
-            height: 48px;
-            border: 5px solid #FFF;
-            border-bottom-color: #4f46e5;
-            border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
-            animation: rotation 1s linear infinite;
-        }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-blue-200 selection:text-blue-900">
 
-    <!-- Global Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center text-white">
-        <span class="loader-ring mb-6"></span>
-        <div class="text-center px-4">
-            <p id="loadingText" class="text-xl font-bold">Đang xử lý văn bản...</p>
-            <p class="text-slate-400 text-sm mt-2">Vui lòng chờ AI trong giây lát</p>
-        </div>
-    </div>
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- Header Navigation -->
-    <nav class="bg-white border-b sticky top-0 z-40 shadow-sm px-4 h-18 py-3">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchView('dashboard')">
-                <div class="bg-indigo-600 p-2.5 rounded-2xl text-white shadow-lg shadow-indigo-100 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-layer-group"></i>
-                </div>
-                <span class="text-2xl font-black tracking-tight text-slate-800 italic">Vocab<span class="text-indigo-600">Master</span></span>
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-wide hidden sm:block">TOEIC Vocab Master</h1>
             </div>
             
-            <div class="flex items-center space-x-2 sm:space-x-4">
-                <button onclick="toggleSettings()" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-indigo-600 bg-slate-50 rounded-xl transition-all" title="Cài đặt">
-                    <i class="fas fa-cog"></i>
+            <div class="flex gap-2 bg-blue-700/50 p-1 rounded-lg">
+                <button id="btn-mode-flashcard" class="px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 shadow-sm" onclick="switchMode('flashcard')">
+                    <i class="fa-solid fa-clone mr-1"></i> Thẻ Từ
                 </button>
-                <button onclick="openManualModal()" class="hidden sm:flex bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold items-center space-x-2 hover:bg-slate-200 transition-all">
-                    <i class="fas fa-plus"></i><span>Thêm từ</span>
+                <button id="btn-mode-quiz" class="px-4 py-1.5 rounded-md text-sm font-medium transition-colors text-white hover:bg-white/20" onclick="switchMode('quiz')">
+                    <i class="fa-solid fa-list-check mr-1"></i> Trắc Nghiệm
                 </button>
-                <button onclick="document.getElementById('pdfInput').click()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 shadow-xl shadow-indigo-50 hover:bg-indigo-700 transition-all">
-                    <i class="fas fa-file-pdf"></i><span>Tải PDF Học</span>
-                </button>
-                <input type="file" id="pdfInput" class="hidden" accept=".pdf" onchange="handlePDFUpload(event)">
             </div>
+
+            <button onclick="toggleSettingsModal()" class="w-10 h-10 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors tooltip" title="Cài đặt & Dữ liệu">
+                <i class="fa-solid fa-gear"></i>
+            </button>
         </div>
     </nav>
 
-    <!-- API Key & Config Panel -->
-    <div id="settingsPanel" class="hidden bg-white border-b p-8 shadow-inner animate-fade-in">
-        <div class="max-w-2xl mx-auto">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-slate-800 flex items-center">
-                    <i class="fas fa-shield-alt mr-2 text-indigo-500"></i> Cấu hình Gemini AI API Key
-                </h3>
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-indigo-600 hover:underline">Lấy Key miễn phí tại đây</a>
-            </div>
-            <div class="flex space-x-3">
-                <input type="password" id="customApiKey" placeholder="Dán API Key của bạn vào đây..." 
-                    class="flex-1 px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-mono">
-                <button onclick="saveApiKey()" class="bg-slate-900 text-white px-8 py-3 rounded-2xl text-sm font-bold hover:bg-black transition-all">Lưu Cấu Hình</button>
-            </div>
-            <p class="text-[10px] text-slate-400 mt-4 uppercase tracking-widest font-black">Lưu ý: Dữ liệu được lưu cục bộ trên trình duyệt này.</p>
+    <!-- Main Content -->
+    <main class="flex-grow max-w-5xl mx-auto w-full px-4 py-8 flex flex-col">
+        
+        <!-- Stats Bar -->
+        <div class="flex justify-between items-center mb-6 text-sm font-medium text-slate-500 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+            <div>Tổng số từ: <span id="total-words" class="text-blue-600 font-bold text-lg">0</span></div>
+            <div id="quiz-score-display" class="hidden">Điểm: <span id="current-score" class="text-green-600 font-bold text-lg">0</span></div>
         </div>
-    </div>
 
-    <main class="max-w-6xl mx-auto px-4 py-10 flex-1 w-full">
-        <!-- Dashboard View -->
-        <section id="dashboardView" class="view">
-            <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <h2 class="text-4xl font-black text-slate-800 leading-none">Thư viện của bạn</h2>
-                    <p class="text-slate-500 mt-3 text-lg">Mỗi bài học bao gồm 30 từ vựng cốt lõi trích xuất từ file.</p>
-                </div>
-                <div class="flex space-x-4">
-                    <button onclick="clearAllData()" class="text-xs font-bold text-red-400 hover:text-red-600 uppercase tracking-widest transition-colors">
-                        <i class="fas fa-trash-alt mr-2"></i> Xóa dữ liệu
-                    </button>
-                </div>
-            </div>
-
-            <div id="lessonGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Lessons populated here -->
-                <div id="emptyState" class="col-span-full py-40 text-center border-2 border-dashed border-slate-200 rounded-[3rem] bg-white text-slate-400">
-                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-cloud-upload-alt text-3xl opacity-20"></i>
+        <!-- ================= FLASHCARD MODE ================= -->
+        <div id="flashcard-view" class="flex-grow flex flex-col items-center w-full max-w-2xl mx-auto">
+            
+            <!-- Progress text -->
+            <div class="text-slate-400 mb-2 font-medium" id="flashcard-progress">1 / 20</div>
+            
+            <!-- Card Container -->
+            <div class="perspective-1000 w-full aspect-[4/3] sm:aspect-[3/2] cursor-pointer group flashcard" id="flashcard" onclick="flipCard()">
+                <div class="flashcard-inner relative w-full h-full shadow-lg rounded-3xl transition-transform duration-500">
+                    
+                    <!-- Front (Word) -->
+                    <div class="absolute inset-0 backface-hidden bg-white rounded-3xl border border-slate-100 flex flex-col items-center justify-center p-8">
+                        <button onclick="playAudio(event)" class="absolute top-4 right-4 w-10 h-10 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors flex items-center justify-center">
+                            <i class="fa-solid fa-volume-high text-xl"></i>
+                        </button>
+                        <h2 id="fc-word" class="text-4xl sm:text-5xl font-bold text-slate-800 text-center mb-4">Word</h2>
+                        <p class="text-slate-400 text-sm italic">Chạm để xem nghĩa</p>
                     </div>
-                    <p class="text-xl font-bold text-slate-600">Chưa có bài học nào</p>
-                    <p class="text-sm mt-2 max-w-xs mx-auto leading-relaxed">Hãy tải một file PDF lên để AI giúp bạn soạn bài học tự động.</p>
+                    
+                    <!-- Back (Meaning) -->
+                    <div class="absolute inset-0 backface-hidden bg-blue-50 rounded-3xl border border-blue-100 flex flex-col items-center justify-center p-8 rotate-y-180">
+                        <h3 id="fc-meaning" class="text-3xl font-semibold text-blue-800 text-center mb-6">Nghĩa của từ</h3>
+                        
+                        <!-- AI Integration Button -->
+                        <button onclick="askAI(event)" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl shadow-md transition-all flex items-center gap-2 font-medium transform hover:scale-105">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Giải thích
+                        </button>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Flashcard View -->
-        <section id="flashcardView" class="view hidden">
-            <div class="flex items-center justify-between mb-10">
-                <button onclick="switchView('dashboard')" class="w-12 h-12 flex items-center justify-center border border-slate-200 rounded-2xl bg-white hover:text-indigo-600 transition-all shadow-sm">
-                    <i class="fas fa-arrow-left"></i>
+            <!-- AI Explanation Result Box -->
+            <div id="ai-result-box" class="w-full mt-6 bg-indigo-50 border border-indigo-100 rounded-2xl p-5 hidden relative shadow-sm">
+                <button onclick="closeAIBox()" class="absolute top-3 right-3 text-indigo-300 hover:text-indigo-600 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
-                <div class="text-center">
-                    <h2 id="cardLessonTitle" class="font-extrabold text-slate-800 text-lg leading-none">Đang học bài</h2>
-                    <div class="flex items-center justify-center space-x-4 mt-3">
-                        <div class="h-2 w-40 bg-slate-200 rounded-full overflow-hidden">
-                            <div id="cardProgressBar" class="h-full bg-indigo-600 transition-all duration-500" style="width: 0%"></div>
-                        </div>
-                        <p id="cardProgressText" class="text-[10px] font-black text-slate-400 uppercase">0 / 30</p>
-                    </div>
+                <div class="flex items-center gap-2 mb-3 text-indigo-700 font-semibold">
+                    <i class="fa-solid fa-robot"></i> Trợ lý AI (Gemini):
                 </div>
-                <div class="w-12"></div>
-            </div>
-
-            <div class="flex flex-col items-center justify-center min-h-[500px]">
-                <div id="flashcard" class="flashcard w-full max-w-sm h-[420px] perspective-1000 cursor-pointer mb-12 group" onclick="this.classList.toggle('flipped')">
-                    <div class="flashcard-inner relative w-full h-full text-center shadow-2xl rounded-[3rem]">
-                        <div class="flashcard-front">
-                            <span class="absolute top-10 px-4 py-1.5 bg-indigo-50 text-indigo-500 rounded-full text-[10px] font-black uppercase tracking-widest">Từ vựng</span>
-                            <h3 id="frontWord" class="text-5xl font-black text-slate-800 break-words px-6 leading-tight">Word</h3>
-                            <div class="mt-12 text-slate-300 group-hover:text-indigo-300 transition-colors">
-                                <i class="fas fa-sync-alt"></i>
-                                <span class="text-[10px] ml-2 font-bold uppercase tracking-tighter">Nhấn để lật thẻ</span>
-                            </div>
-                        </div>
-                        <div class="flashcard-back">
-                            <span class="absolute top-10 px-4 py-1.5 bg-white/20 text-white rounded-full text-[10px] font-black uppercase tracking-widest">Định nghĩa</span>
-                            <p id="backMeaning" class="text-3xl font-bold mb-6 px-8 leading-tight">Nghĩa của từ</p>
-                            <div class="w-12 h-1 bg-white/30 rounded-full mb-8"></div>
-                            <p id="backExample" class="text-indigo-100 italic text-sm text-center px-10 leading-relaxed">...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex space-x-8 items-center">
-                    <button onclick="prevCard()" class="w-16 h-16 bg-white border border-slate-200 rounded-3xl hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm">
-                        <i class="fas fa-chevron-left text-xl"></i>
-                    </button>
-                    <button onclick="speakWord()" class="w-20 h-20 bg-indigo-600 text-white rounded-[2rem] shadow-2xl shadow-indigo-100 hover:scale-110 transition-all flex items-center justify-center">
-                        <i class="fas fa-volume-up text-2xl"></i>
-                    </button>
-                    <button onclick="nextCard()" class="w-16 h-16 bg-white border border-slate-200 rounded-3xl hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm">
-                        <i class="fas fa-chevron-right text-xl"></i>
-                    </button>
+                <div id="ai-content" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                    Đang tải giải thích...
                 </div>
             </div>
-        </section>
 
-        <!-- Quiz View -->
-        <section id="quizView" class="view hidden">
-            <div class="flex items-center justify-between mb-10">
-                <button onclick="switchView('dashboard')" class="text-slate-400 font-black text-[10px] uppercase tracking-widest hover:text-red-500 transition-colors">
-                    <i class="fas fa-times mr-1 text-sm"></i> Thoát
+            <!-- Controls -->
+            <div class="flex gap-4 mt-8 w-full justify-center">
+                <button onclick="prevCard()" class="w-14 h-14 bg-white border border-slate-200 text-slate-600 rounded-full shadow-sm hover:bg-slate-50 hover:text-blue-600 transition-all flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-arrow-left"></i>
                 </button>
-                <div class="text-center">
-                    <h2 class="font-extrabold text-slate-800 text-lg">Kiểm tra nhanh</h2>
-                    <p id="quizProgressText" class="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-1">Câu 1 / 10</p>
-                </div>
-                <div class="bg-slate-900 text-white px-6 py-2.5 rounded-2xl text-xs font-black shadow-xl">
-                    Đúng: <span id="quizScore">0</span>
-                </div>
+                <button onclick="shuffleCards()" class="w-14 h-14 bg-white border border-slate-200 text-slate-600 rounded-full shadow-sm hover:bg-slate-50 hover:text-blue-600 transition-all flex items-center justify-center text-xl" title="Xáo trộn">
+                    <i class="fa-solid fa-shuffle"></i>
+                </button>
+                <button onclick="nextCard()" class="w-14 h-14 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition-all flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
+        </div>
 
-            <div class="max-w-2xl mx-auto">
-                <div class="bg-white p-14 rounded-[4rem] shadow-sm border border-slate-100 text-center mb-10 relative overflow-hidden">
-                    <div id="quizIndicator" class="absolute top-0 left-0 w-full h-2 bg-transparent transition-colors duration-500"></div>
-                    <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-6 block">Dịch từ sau sang tiếng Việt:</span>
-                    <h3 id="quizQuestion" class="text-6xl font-black text-slate-800 break-words">Word</h3>
-                </div>
-
-                <div id="quizOptions" class="grid gap-5">
-                    <!-- Options populated here -->
-                </div>
-
-                <div id="nextBtnContainer" class="mt-12 flex justify-center hidden">
-                    <button onclick="goToNextQuestion()" class="bg-indigo-600 text-white px-14 py-5 rounded-[2.5rem] font-black shadow-2xl shadow-indigo-50 hover:bg-indigo-700 hover:-translate-y-1 transition-all flex items-center space-x-4 group">
-                        <span class="tracking-wide">TIẾP TỤC HÀNH TRÌNH</span>
-                        <i class="fas fa-arrow-right group-hover:translate-x-3 transition-transform"></i>
+        <!-- ================= QUIZ MODE ================= -->
+        <div id="quiz-view" class="hidden flex-grow flex-col items-center w-full max-w-2xl mx-auto">
+            <div class="w-full bg-white rounded-3xl shadow-lg border border-slate-100 p-6 sm:p-10 text-center">
+                
+                <div class="text-slate-400 mb-4 font-medium" id="quiz-progress">Câu hỏi 1 / 20</div>
+                
+                <div class="flex items-center justify-center gap-4 mb-8">
+                    <h2 id="quiz-word" class="text-3xl sm:text-4xl font-bold text-slate-800">Word</h2>
+                    <button onclick="playAudioQuiz()" class="text-slate-400 hover:text-blue-500 transition-colors">
+                        <i class="fa-solid fa-volume-high text-xl"></i>
                     </button>
                 </div>
+
+                <p class="text-slate-500 mb-6 font-medium">Chọn nghĩa đúng nhất:</p>
+
+                <!-- Options -->
+                <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Options injected via JS -->
+                </div>
+
+                <!-- Next Button (Hidden initially) -->
+                <button id="btn-next-quiz" onclick="nextQuiz()" class="hidden mt-8 mx-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all">
+                    Câu tiếp theo <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
             </div>
-        </section>
+        </div>
+
     </main>
 
-    <!-- Manual Add Word Modal -->
-    <div id="manualModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
-        <div class="bg-white p-12 rounded-[3.5rem] shadow-2xl max-w-md w-full border border-slate-100">
-            <h3 class="text-2xl font-black mb-6 text-slate-800 leading-tight">Thêm từ vựng mới</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase block mb-1.5 ml-1">Từ tiếng Anh</label>
-                    <input type="text" id="newWord" placeholder="VD: Opportunity..." class="w-full px-5 py-3.5 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold">
-                </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase block mb-1.5 ml-1">Nghĩa tiếng Việt</label>
-                    <input type="text" id="newMeaning" placeholder="VD: Cơ hội..." class="w-full px-5 py-3.5 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold">
-                </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase block mb-1.5 ml-1">Ví dụ (EN)</label>
-                    <input type="text" id="newExample" placeholder="VD: A great opportunity came up..." class="w-full px-5 py-3.5 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 italic">
-                </div>
-            </div>
-            <div class="flex space-x-3 mt-10">
-                <button onclick="closeManualModal()" class="flex-1 py-4 bg-slate-100 rounded-3xl font-black text-xs uppercase hover:bg-slate-200 transition-all">Hủy bỏ</button>
-                <button onclick="addNewWord()" class="flex-1 py-4 bg-indigo-600 text-white rounded-3xl font-black text-xs uppercase shadow-xl shadow-indigo-50 hover:bg-indigo-700 transition-all">Xác nhận</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Global Information Modal -->
-    <div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-6">
-        <div class="bg-white p-12 rounded-[4rem] shadow-2xl max-w-sm w-full text-center border border-slate-100">
-            <div id="modalIcon" class="w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-inner"></div>
-            <h3 id="modalTitle" class="text-3xl font-black mb-4 text-slate-800 leading-tight"></h3>
-            <p id="modalMsg" class="text-slate-500 mb-10 text-sm leading-relaxed"></p>
-            <button onclick="closeModal()" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-black hover:bg-slate-800 shadow-2xl transition-all uppercase tracking-widest text-xs">Đóng lại</button>
-        </div>
-    </div>
-
-    <script>
-        // --- Data Persistence ---
-        const LS_KEY = 'vocab_pro_data_v2';
-        const API_KEY_LS = 'gemini_api_key_v2';
-
-        let lessons = JSON.parse(localStorage.getItem(LS_KEY)) || [];
-        let selectedLesson = null;
-        let cardIdx = 0;
-        let qIdx = 0;
-        let qScore = 0;
-        let qData = [];
-        let isAnswering = false;
-
-        window.onload = () => {
-            renderDashboard();
-            const savedKey = localStorage.getItem(API_KEY_LS);
-            if (savedKey) document.getElementById('customApiKey').value = savedKey;
-        };
-
-        function persist() {
-            localStorage.setItem(LS_KEY, JSON.stringify(lessons));
-        }
-
-        // --- View Controller ---
-        function switchView(view) {
-            document.querySelectorAll('.view').forEach(e => e.classList.add('hidden'));
-            document.getElementById(view + 'View').classList.remove('hidden');
-            document.getElementById('settingsPanel').classList.add('hidden');
-            window.scrollTo(0, 0);
-        }
-
-        function toggleSettings() {
-            document.getElementById('settingsPanel').classList.toggle('hidden');
-        }
-
-        function saveApiKey() {
-            const val = document.getElementById('customApiKey').value.trim();
-            if (!val) return;
-            localStorage.setItem(API_KEY_LS, val);
-            showModal("Hệ thống sẵn sàng", "API Key đã được lưu an toàn. Giờ bạn có thể tải PDF để học.", "success");
-            toggleSettings();
-        }
-
-        function clearAllData() {
-            if (confirm("Bạn có chắc chắn muốn xóa vĩnh viễn toàn bộ từ vựng và bài học?")) {
-                lessons = [];
-                persist();
-                renderDashboard();
-                showModal("Đã xóa sạch", "Dữ liệu học tập đã được đưa về trạng thái ban đầu.", "success");
-            }
-        }
-
-        // --- Dashboard Management ---
-        function renderDashboard() {
-            const grid = document.getElementById('lessonGrid');
-            const empty = document.getElementById('emptyState');
+    <!-- ================= SETTINGS & DATA MODAL ================= -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 transform scale-95 transition-transform duration-300 overflow-hidden flex flex-col max-h-[90vh]">
             
-            if (lessons.length === 0) {
-                grid.innerHTML = "";
-                grid.appendChild(empty);
-                return;
-            }
+            <!-- Modal Header -->
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-database mr-2 text-blue-500"></i> Cài đặt Dữ liệu</h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
 
-            if(empty) empty.remove();
-            grid.innerHTML = lessons.map((l, i) => `
-                <div class="bg-white p-10 rounded-[3.5rem] shadow-sm border border-slate-50 hover:shadow-2xl transition-all group relative overflow-hidden">
-                    <div class="absolute -right-6 -top-6 w-32 h-32 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-1000 opacity-50"></div>
-                    <div class="relative z-10">
-                        <div class="flex justify-between items-start mb-10">
-                            <div class="p-5 bg-indigo-600 rounded-[1.5rem] text-white shadow-2xl shadow-indigo-100 group-hover:rotate-6 transition-transform">
-                                <i class="fas fa-graduation-cap"></i>
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+                
+                <!-- Section: API Key -->
+                <div class="mb-6 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                    <label class="block text-sm font-semibold text-indigo-900 mb-2">
+                        <i class="fa-brands fa-google mr-1"></i> Google Gemini API Key
+                    </label>
+                    <p class="text-xs text-indigo-600/70 mb-2">Nhập API Key để AI giải thích từ vựng và cho ví dụ ngữ cảnh TOEIC.</p>
+                    <input type="password" id="input-api-key" placeholder="AIzaSy..." class="w-full px-4 py-2.5 rounded-lg border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-shadow">
+                    <button onclick="saveApiKey()" class="mt-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg transition-colors">Lưu Key</button>
+                </div>
+
+                <hr class="border-slate-100 my-6">
+
+                <!-- Section: PDF Upload -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-800 mb-2">
+                        <i class="fa-solid fa-file-pdf mr-1 text-red-500"></i> Nhập danh sách từ PDF
+                    </label>
+                    <p class="text-xs text-slate-500 mb-3">
+                        Định dạng file PDF ưu tiên có chứa dấu "-" hoặc ":" ngăn cách giữa Từ và Nghĩa (VD: <span class="font-mono bg-slate-100 px-1 rounded text-red-600">accommodate - cung cấp chỗ ở</span>). Hệ thống sẽ tự động trích xuất.
+                    </p>
+                    
+                    <div class="flex items-center justify-center w-full">
+                        <label for="pdf-upload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-blue-50 hover:border-blue-400 transition-colors">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400 mb-2"></i>
+                                <p class="mb-1 text-sm text-slate-500 font-medium">Click để chọn file PDF</p>
+                                <p class="text-xs text-slate-400">Tối đa 1000 từ</p>
                             </div>
-                            <span class="text-[10px] font-black text-indigo-500 bg-indigo-50 px-5 py-2 rounded-full uppercase tracking-widest">${l.words.length} TỪ VỰNG</span>
-                        </div>
-                        <h3 class="font-extrabold text-slate-800 mb-12 text-2xl leading-tight group-hover:text-indigo-600 transition-colors">${l.title}</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <button onclick="startCards(${i})" class="bg-indigo-600 text-white py-4 rounded-3xl text-[10px] font-black hover:bg-indigo-700 transition-all uppercase tracking-tighter">Học Thẻ Bài</button>
-                            <button onclick="startQuiz(${i})" class="bg-slate-900 text-white py-4 rounded-3xl text-[10px] font-black hover:bg-slate-800 transition-all uppercase tracking-tighter">Làm Đề Thi</button>
-                        </div>
+                            <input id="pdf-upload" type="file" class="hidden" accept=".pdf" onchange="handlePDFUpload(event)" />
+                        </label>
+                    </div>
+                    
+                    <div id="pdf-loading" class="hidden mt-3 text-center text-sm text-blue-600 font-medium">
+                        <i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Đang đọc và phân tích file PDF...
                     </div>
                 </div>
-            `).join('');
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="resetToDefaultData()" class="text-sm text-slate-500 hover:text-red-600 underline transition-colors">
+                        Khôi phục từ vựng mặc định
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration & Logic Script -->
+    <script>
+        // Setup PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // --- Data State ---
+        const DEFAULT_VOCAB = [
+            { word: "accommodate", meaning: "cung cấp chỗ ở, đáp ứng" },
+            { word: "arrangement", meaning: "sự sắp xếp, thỏa thuận" },
+            { word: "association", meaning: "hiệp hội, sự liên kết" },
+            { word: "attend", meaning: "tham dự, có mặt" },
+            { word: "get in touch", meaning: "liên lạc, giữ liên lạc" },
+            { word: "hold", meaning: "cầm, nắm, tổ chức (sự kiện)" },
+            { word: "location", meaning: "địa điểm, vị trí" },
+            { word: "overcrowded", meaning: "chật ních, quá đông đúc" },
+            { word: "register", meaning: "đăng ký, ghi danh" },
+            { word: "select", meaning: "chọn lựa, tuyển chọn" },
+            { word: "session", meaning: "phiên họp, buổi họp" },
+            { word: "take part in", meaning: "tham gia vào (= participate in)" },
+            { word: "access", meaning: "truy cập, đường vào" },
+            { word: "allocate", meaning: "phân bổ, cấp phát" },
+            { word: "compatible", meaning: "tương thích, hợp nhau" },
+            { word: "delete", meaning: "xóa bỏ" },
+            { word: "display", meaning: "hiển thị, trưng bày" },
+            { word: "duplicate", meaning: "sao chép, bản sao" },
+            { word: "failure", meaning: "sự thất bại, sự hỏng hóc" },
+            { word: "ignore", meaning: "phớt lờ, bỏ qua" }
+        ];
+
+        let vocabList = [...DEFAULT_VOCAB];
+        let currentMode = 'flashcard'; // 'flashcard' or 'quiz'
+        
+        // Flashcard State
+        let fcIndex = 0;
+        let isFlipped = false;
+        
+        // Quiz State
+        let quizQuestions = [];
+        let quizIndex = 0;
+        let score = 0;
+
+        // API Key Storage
+        let geminiApiKey = localStorage.getItem('toeic_gemini_key') || '';
+
+        // --- Initialization ---
+        window.onload = () => {
+            document.getElementById('input-api-key').value = geminiApiKey;
+            initUI();
+        };
+
+        function initUI() {
+            document.getElementById('total-words').textContent = vocabList.length;
+            
+            if (currentMode === 'flashcard') {
+                document.getElementById('btn-mode-flashcard').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 shadow-sm";
+                document.getElementById('btn-mode-quiz').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors text-white hover:bg-white/20";
+                
+                document.getElementById('flashcard-view').classList.remove('hidden');
+                document.getElementById('quiz-view').classList.add('hidden');
+                document.getElementById('quiz-score-display').classList.add('hidden');
+                
+                fcIndex = 0;
+                renderFlashcard();
+            } else {
+                document.getElementById('btn-mode-quiz').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 shadow-sm";
+                document.getElementById('btn-mode-flashcard').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors text-white hover:bg-white/20";
+                
+                document.getElementById('quiz-view').classList.remove('hidden');
+                document.getElementById('flashcard-view').classList.add('hidden');
+                document.getElementById('quiz-score-display').classList.remove('hidden');
+                
+                generateQuiz();
+            }
         }
 
-        // --- PDF & AI Processor ---
-        async function handlePDFUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        function switchMode(mode) {
+            currentMode = mode;
+            initUI();
+        }
 
-            const apiKey = localStorage.getItem(API_KEY_LS);
-            if (!apiKey) {
-                showModal("Thiếu chìa khóa AI", "Vui lòng dán Gemini API Key trong cài đặt để dùng tính năng trích xuất PDF.", "error");
+        // --- Flashcard Logic ---
+        function renderFlashcard() {
+            if(vocabList.length === 0) return;
+            const wordObj = vocabList[fcIndex];
+            
+            const card = document.getElementById('flashcard');
+            card.classList.remove('flipped');
+            isFlipped = false;
+            
+            // Give slight delay for flip animation to reset before changing text
+            setTimeout(() => {
+                document.getElementById('fc-word').textContent = wordObj.word;
+                document.getElementById('fc-meaning').textContent = wordObj.meaning;
+                document.getElementById('flashcard-progress').textContent = `${fcIndex + 1} / ${vocabList.length}`;
+                closeAIBox();
+            }, 150);
+        }
+
+        function flipCard() {
+            const card = document.getElementById('flashcard');
+            card.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+        }
+
+        function nextCard() {
+            if (fcIndex < vocabList.length - 1) {
+                fcIndex++;
+                renderFlashcard();
+            } else {
+                showToast("Đã đến thẻ cuối cùng!", "info");
+            }
+        }
+
+        function prevCard() {
+            if (fcIndex > 0) {
+                fcIndex--;
+                renderFlashcard();
+            }
+        }
+
+        function shuffleCards() {
+            vocabList = vocabList.sort(() => Math.random() - 0.5);
+            fcIndex = 0;
+            renderFlashcard();
+            showToast("Đã xáo trộn bộ từ vựng", "success");
+        }
+
+        // --- Quiz Logic ---
+        function generateQuiz() {
+            score = 0;
+            quizIndex = 0;
+            document.getElementById('current-score').textContent = score;
+            
+            // Create a shuffled copy of vocab
+            let shuffledVocab = [...vocabList].sort(() => Math.random() - 0.5);
+            quizQuestions = [];
+
+            shuffledVocab.forEach(targetWord => {
+                // Get 3 random wrong answers
+                let wrongOptions = vocabList
+                    .filter(w => w.word !== targetWord.word)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 3)
+                    .map(w => w.meaning);
+                
+                // If not enough vocab for 4 options, duplicate some (edge case)
+                while(wrongOptions.length < 3) wrongOptions.push("Nghĩa khác " + Math.random().toString(36).substring(7));
+
+                let options = [...wrongOptions, targetWord.meaning].sort(() => Math.random() - 0.5);
+                
+                quizQuestions.push({
+                    word: targetWord.word,
+                    correct: targetWord.meaning,
+                    options: options
+                });
+            });
+
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            if (quizIndex >= quizQuestions.length) {
+                document.getElementById('quiz-word').innerHTML = `<span class="text-blue-600">Hoàn thành!</span>`;
+                document.getElementById('quiz-options').innerHTML = `<p class="col-span-1 sm:col-span-2 text-xl font-bold">Điểm của bạn: ${score}/${quizQuestions.length}</p>
+                <button onclick="generateQuiz()" class="mt-4 col-span-1 sm:col-span-2 py-3 bg-indigo-50 text-indigo-700 font-semibold rounded-xl hover:bg-indigo-100">Làm lại</button>`;
+                document.getElementById('btn-next-quiz').classList.add('hidden');
+                document.getElementById('quiz-progress').textContent = "Kết quả";
                 return;
             }
 
-            showLoading("Đang nén và quét dữ liệu PDF...");
-            const reader = new FileReader();
-            reader.onload = async function() {
-                try {
-                    const typedArray = new Uint8Array(this.result);
-                    const pdf = await pdfjsLib.getDocument(typedArray).promise;
-                    let fullText = "";
-                    const totalP = Math.min(pdf.numPages, 100);
-                    
-                    for (let i = 1; i <= totalP; i++) {
-                        updateLoading(`Đang đọc nội dung trang ${i}/${totalP}...`);
-                        const page = await pdf.getPage(i);
-                        const content = await page.getTextContent();
-                        fullText += content.items.map(it => it.str).join(" ");
-                    }
-                    
-                    invokeGeminiAI(fullText);
-                } catch (err) {
-                    hideLoading();
-                    showModal("Lỗi tệp tin", "File PDF này không thể đọc được nội dung văn bản. Hãy thử file khác.", "error");
-                }
-            };
-            reader.readAsArrayBuffer(file);
+            const q = quizQuestions[quizIndex];
+            document.getElementById('quiz-word').textContent = q.word;
+            document.getElementById('quiz-progress').textContent = `Câu hỏi ${quizIndex + 1} / ${quizQuestions.length}`;
+            document.getElementById('btn-next-quiz').classList.add('hidden');
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 text-left border-2 border-slate-100 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all font-medium text-slate-700 w-full option-btn";
+                btn.textContent = opt;
+                btn.onclick = () => handleQuizAnswer(btn, opt, q.correct);
+                optionsContainer.appendChild(btn);
+            });
         }
 
-        async function invokeGeminiAI(text) {
-            const apiKey = localStorage.getItem(API_KEY_LS);
-            showLoading("AI đang lọc 1000 từ vựng quan trọng nhất (khoảng 30-60 giây)...");
+        function handleQuizAnswer(btn, selectedOption, correctOption) {
+            // Disable all buttons
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => {
+                b.onclick = null;
+                b.classList.remove('hover:border-blue-400', 'hover:bg-blue-50', 'cursor-pointer');
+                
+                // Highlight correct answer anyway
+                if (b.textContent === correctOption) {
+                    b.classList.add('border-green-500', 'bg-green-50', 'text-green-800');
+                    b.innerHTML += ' <i class="fa-solid fa-check-circle float-right mt-1 text-green-500"></i>';
+                }
+            });
+
+            if (selectedOption === correctOption) {
+                score++;
+                document.getElementById('current-score').textContent = score;
+                playSuccessSound();
+            } else {
+                btn.classList.add('border-red-500', 'bg-red-50', 'text-red-800');
+                btn.innerHTML += ' <i class="fa-solid fa-times-circle float-right mt-1 text-red-500"></i>';
+                playErrorSound();
+            }
+
+            document.getElementById('btn-next-quiz').classList.remove('hidden');
+        }
+
+        function nextQuiz() {
+            quizIndex++;
+            renderQuizQuestion();
+        }
+
+        // --- Audio TTS ---
+        function playAudio(event) {
+            if(event) event.stopPropagation(); // prevent card flip
+            const word = vocabList[fcIndex].word;
+            speakText(word);
+        }
+
+        function playAudioQuiz() {
+            const word = quizQuestions[quizIndex].word;
+            speakText(word);
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9; // Slightly slower for better pronunciation
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showToast("Trình duyệt không hỗ trợ phát âm thanh", "error");
+            }
+        }
+
+        // Simple beep sounds via Web Audio API (Fallback if no real audio files)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSuccessSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(500, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playErrorSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.15);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+
+
+        // --- Gemini API Integration ---
+        function saveApiKey() {
+            const key = document.getElementById('input-api-key').value.trim();
+            if(key) {
+                geminiApiKey = key;
+                localStorage.setItem('toeic_gemini_key', key);
+                showToast("Đã lưu API Key!", "success");
+            } else {
+                geminiApiKey = '';
+                localStorage.removeItem('toeic_gemini_key');
+                showToast("Đã xóa API Key!", "info");
+            }
+        }
+
+        function closeAIBox() {
+            document.getElementById('ai-result-box').classList.add('hidden');
+        }
+
+        async function askAI(event) {
+            event.stopPropagation(); // prevent card flip
             
-            const systemPrompt = `Bạn là một từ điển Anh-Việt thông minh. Trích xuất tối đa các từ vựng học thuật, chuyên ngành hoặc từ mới quan trọng từ văn bản này.
-            TRẢ VỀ DUY NHẤT MỘT MẢNG JSON các đối tượng: {"word": "từ tiếng Anh", "definition": "nghĩa tiếng Việt ngắn", "example": "ví dụ tiếng Anh đơn giản"}.
-            Không kèm markdown, không kèm giải thích. Trích xuất càng nhiều càng tốt lên tới 1000 từ.`;
+            if (!geminiApiKey) {
+                showToast("Vui lòng nhập Gemini API Key trong Cài đặt", "error");
+                toggleSettingsModal();
+                return;
+            }
+
+            const wordObj = vocabList[fcIndex];
+            const resultBox = document.getElementById('ai-result-box');
+            const contentBox = document.getElementById('ai-content');
+            
+            resultBox.classList.remove('hidden');
+            contentBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> AI đang phân tích từ "' + wordObj.word + '"...';
+
+            // Construct Prompt
+            const prompt = `Bạn là một chuyên gia luyện thi TOEIC. Hãy giải thích ngắn gọn, súc tích từ vựng tiếng Anh: "${wordObj.word}" (nghĩa: ${wordObj.meaning}). 
+Yêu cầu trả về theo định dạng văn bản bình thường (không dùng markdown in đậm quá nhiều), gồm 3 ý chính:
+1. Giải thích sắc thái nghĩa trong TOEIC.
+2. 1 Câu ví dụ tiếng Anh (kèm dịch tiếng Việt).
+3. Các từ đồng nghĩa thường gặp (Synonyms).`;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                // Implement exponential backoff for API Call
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`;
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Văn bản: ${text.substring(0, 45000)}` }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
-                        generationConfig: { responseMimeType: "application/json", maxOutputTokens: 8192 }
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.3 }
                     })
                 });
 
-                const result = await response.json();
-                if (result.error) throw new Error(result.error.message);
-                
-                let jsonStr = result.candidates[0].content.parts[0].text.trim();
-                // Clean markdown if present
-                if (jsonStr.startsWith("```")) {
-                    jsonStr = jsonStr.replace(/^```json/, "").replace(/```$/, "").trim();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
-                const wordList = JSON.parse(jsonStr);
-                if (!Array.isArray(wordList) || wordList.length === 0) throw new Error("AI không tìm thấy từ vựng hợp lệ.");
 
-                // Split into lessons of 30
-                const CHUNK = 30;
-                for (let i = 0; i < Math.ceil(wordList.length / CHUNK); i++) {
-                    const words = wordList.slice(i * CHUNK, (i + 1) * CHUNK);
-                    lessons.push({
-                        id: Date.now() + i,
-                        title: `Bài học từ File #${lessons.length + 1}`,
-                        words: words,
-                        createdAt: new Date().toISOString()
-                    });
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    let aiText = data.candidates[0].content.parts[0].text;
+                    // Basic formatting text to HTML
+                    aiText = aiText.replace(/\n/g, '<br>');
+                    contentBox.innerHTML = aiText;
+                } else {
+                    contentBox.innerHTML = 'Không nhận được kết quả hợp lệ từ AI.';
                 }
-                
-                persist();
-                renderDashboard();
-                hideLoading();
-                showModal("Phân tích xong!", `Đã tìm thấy ${wordList.length} từ và chia làm ${Math.ceil(wordList.length / CHUNK)} bài học mới.`, "success");
-            } catch (err) {
-                hideLoading();
-                console.error(err);
-                showModal("Lỗi phân tích AI", "Không thể xử lý dữ liệu. Hãy kiểm tra lại kết nối mạng hoặc API Key.", "error");
+
+            } catch (error) {
+                console.error("API Error:", error);
+                contentBox.innerHTML = `<span class="text-red-500"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi khi gọi API: ${error.message}. Kiểm tra lại API Key.</span>`;
             }
         }
 
-        // --- Manual Addition Logic ---
-        function openManualModal() { document.getElementById('manualModal').classList.remove('hidden'); }
-        function closeManualModal() { document.getElementById('manualModal').classList.add('hidden'); }
-        function addNewWord() {
-            const w = document.getElementById('newWord').value.trim();
-            const m = document.getElementById('newMeaning').value.trim();
-            const e = document.getElementById('newExample').value.trim();
-            
-            if(!w || !m) { alert("Vui lòng điền đủ từ và nghĩa!"); return; }
-            
-            if(lessons.length === 0) {
-                lessons.push({ id: Date.now(), title: 'Kho từ cá nhân', words: [], createdAt: new Date().toISOString() });
-            }
-            
-            lessons[0].words.push({ word: w, definition: m, example: e || 'No example given.' });
-            persist();
-            renderDashboard();
-            closeManualModal();
-            
-            document.getElementById('newWord').value = "";
-            document.getElementById('newMeaning').value = "";
-            document.getElementById('newExample').value = "";
-        }
 
-        // --- Learning Flow (Flashcards) ---
-        function startCards(idx) {
-            selectedLesson = lessons[idx];
-            cardIdx = 0;
-            updateCardUI();
-            switchView('flashcard');
-        }
-
-        function updateCardUI() {
-            const data = selectedLesson.words[cardIdx];
-            document.getElementById('flashcard').classList.remove('flipped');
-            document.getElementById('frontWord').innerText = data.word;
-            document.getElementById('backMeaning').innerText = data.definition;
-            document.getElementById('backExample').innerText = data.example;
-            document.getElementById('cardLessonTitle').innerText = selectedLesson.title;
-            
-            const progress = ((cardIdx + 1) / selectedLesson.words.length) * 100;
-            document.getElementById('cardProgressBar').style.width = `${progress}%`;
-            document.getElementById('cardProgressText').innerText = `${cardIdx + 1} / ${selectedLesson.words.length}`;
-        }
-
-        function nextCard() { if (cardIdx < selectedLesson.words.length - 1) { cardIdx++; updateCardUI(); } }
-        function prevCard() { if (cardIdx > 0) { cardIdx--; updateCardUI(); } }
-        function speakWord() {
-            const text = selectedLesson.words[cardIdx].word;
-            const utt = new SpeechSynthesisUtterance(text);
-            utt.lang = 'en-US';
-            utt.rate = 0.85;
-            window.speechSynthesis.speak(utt);
-        }
-
-        // --- Quiz Flow ---
-        function startQuiz(idx) {
-            selectedLesson = lessons[idx];
-            if(selectedLesson.words.length < 4) {
-                showModal("Không đủ dữ liệu", "Bài học cần ít nhất 4 từ để tạo trắc nghiệm.", "error");
-                return;
-            }
-            qIdx = 0; qScore = 0; isAnswering = false;
-            // Get 10 random questions or max available
-            qData = [...selectedLesson.words].sort(() => 0.5 - Math.random()).slice(0, 10);
-            updateQuizUI();
-            switchView('quiz');
-        }
-
-        function updateQuizUI() {
-            if (qIdx >= qData.length) {
-                showModal("Đã hoàn thành!", `Bạn đã trả lời đúng ${qScore}/${qData.length} câu hỏi. Rất tốt!`, "success");
-                switchView('dashboard');
+        // --- PDF Processing ---
+        async function handlePDFUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.type !== "application/pdf") {
+                showToast("Vui lòng chọn file PDF hợp lệ", "error");
                 return;
             }
 
-            isAnswering = false;
-            document.getElementById('nextBtnContainer').classList.add('hidden');
-            document.getElementById('quizIndicator').className = "absolute top-0 left-0 w-full h-2 bg-transparent transition-colors duration-500";
-            
-            const cur = qData[qIdx];
-            document.getElementById('quizQuestion').innerText = cur.word;
-            document.getElementById('quizProgressText').innerText = `CÂU ${qIdx + 1} / ${qData.length}`;
-            document.getElementById('quizScore').innerText = qScore;
+            document.getElementById('pdf-loading').classList.remove('hidden');
 
-            // Generate distracting options
-            const distractors = selectedLesson.words
-                .filter(w => w.word !== cur.word)
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 3);
-            
-            const options = [...distractors, cur].sort(() => 0.5 - Math.random());
-            
-            document.getElementById('quizOptions').innerHTML = options.map((opt, i) => `
-                <button id="qopt-${i}" onclick="checkAnswer(${i}, '${opt.word}', '${cur.word}')" 
-                    class="option-btn w-full text-left p-7 rounded-[2.5rem] border-2 border-slate-100 bg-white hover:border-indigo-400 transition-all font-bold text-slate-700 shadow-sm flex items-center group">
-                    <span class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center mr-6 text-xs font-black group-hover:bg-indigo-600 group-hover:text-white transition-all uppercase">${String.fromCharCode(65 + i)}</span>
-                    <span class="flex-1">${opt.definition}</span>
-                </button>
-            `).join('');
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                let fullText = "";
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageStrings = textContent.items.map(item => item.str);
+                    fullText += pageStrings.join(" ") + "\n";
+                }
+
+                parseVocabText(fullText);
+                
+            } catch (error) {
+                console.error("PDF Parsing Error:", error);
+                showToast("Lỗi khi đọc file PDF", "error");
+            } finally {
+                document.getElementById('pdf-loading').classList.add('hidden');
+                event.target.value = ""; // Reset input
+            }
         }
 
-        function checkAnswer(idx, chosen, correct) {
-            if (isAnswering) return;
-            isAnswering = true;
-
-            const btn = document.getElementById(`qopt-${idx}`);
-            const indicator = document.getElementById('quizIndicator');
+        function parseVocabText(text) {
+            // Heuristic Parser: Look for lines that contain "-" or ":" separating English and Vietnamese
+            const lines = text.split('\n');
+            let newVocab = [];
             
-            if (chosen === correct) {
-                qScore++;
-                btn.classList.add('correct');
-                indicator.classList.replace('bg-transparent', 'bg-green-500');
+            // Regex to match: [English Words] [- or :] [Vietnamese meaning]
+            // Example: "12. accommodate (v) : cung cấp nơi ở"
+            const regex = /([a-zA-Z\s]+)(?:\([a-z]+\))?\s*[-:]\s*(.+)/;
+
+            lines.forEach(line => {
+                const match = line.match(regex);
+                if (match && match[1] && match[2]) {
+                    let word = match[1].trim();
+                    // Clean up word (remove leading numbers like "1. ")
+                    word = word.replace(/^\d+[\.\)]\s*/, '').trim();
+                    let meaning = match[2].trim();
+                    
+                    // Filter out bad parses (word too long, empty meaning)
+                    if (word.length > 0 && word.length < 30 && meaning.length > 0) {
+                        newVocab.push({ word, meaning });
+                    }
+                }
+            });
+
+            // Limit to 1000 words
+            if(newVocab.length > 1000) {
+                newVocab = newVocab.slice(0, 1000);
+            }
+
+            if (newVocab.length > 0) {
+                vocabList = newVocab;
+                showToast(`Đã thêm thành công ${newVocab.length} từ vựng từ PDF!`, "success");
+                toggleSettingsModal();
+                initUI();
             } else {
-                btn.classList.add('wrong', 'animate-shake');
-                indicator.classList.replace('bg-transparent', 'bg-red-500');
-                
-                // Show the right one
-                const all = document.querySelectorAll('.option-btn');
-                all.forEach(b => {
-                    const def = b.querySelector('.flex-1').innerText;
-                    const rightDef = qData[qIdx].definition;
-                    if (def === rightDef) b.classList.add('correct');
-                });
+                showToast("Không tìm thấy định dạng Từ - Nghĩa phù hợp trong PDF.", "error");
+            }
+        }
+
+        function resetToDefaultData() {
+            vocabList = [...DEFAULT_VOCAB];
+            showToast("Đã khôi phục bộ từ vựng mặc định", "info");
+            toggleSettingsModal();
+            initUI();
+        }
+
+        // --- UI Utilities ---
+        function toggleSettingsModal() {
+            const modal = document.getElementById('settings-modal');
+            const modalInner = modal.querySelector('div');
+            
+            if (modal.classList.contains('hidden')) {
+                // Open
+                modal.classList.remove('hidden');
+                // Trigger reflow
+                void modal.offsetWidth;
+                modal.classList.remove('opacity-0');
+                modalInner.classList.remove('scale-95');
+            } else {
+                // Close
+                modal.classList.add('opacity-0');
+                modalInner.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300); // match duration-300
+            }
+        }
+
+        function showToast(message, type="info") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgClass = "bg-slate-800 text-white";
+            let icon = '<i class="fa-solid fa-circle-info text-blue-400"></i>';
+            
+            if (type === "success") {
+                icon = '<i class="fa-solid fa-circle-check text-green-400"></i>';
+            } else if (type === "error") {
+                icon = '<i class="fa-solid fa-circle-xmark text-red-400"></i>';
             }
 
-            document.getElementById('nextBtnContainer').classList.remove('hidden');
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-sm font-medium transform transition-all duration-300 translate-y-2 opacity-0 ${bgClass}`;
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
-        function goToNextQuestion() {
-            qIdx++;
-            updateQuizUI();
-        }
-
-        // --- Utility ---
-        function showLoading(txt) {
-            document.getElementById('loadingText').innerText = txt;
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-        }
-        function updateLoading(txt) {
-            document.getElementById('loadingText').innerText = txt;
-        }
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-        function showModal(title, msg, type) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalMsg').innerText = msg;
-            const ic = document.getElementById('modalIcon');
-            ic.className = `w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-inner ${type === 'success' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'}`;
-            ic.innerHTML = type === 'success' ? '<i class="fas fa-check-circle text-4xl"></i>' : '<i class="fas fa-exclamation-triangle text-4xl"></i>';
-            document.getElementById('modal').classList.remove('hidden');
-        }
-        function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-        }
     </script>
 </body>
 </html>
