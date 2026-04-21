@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luyện Từ Vựng TOEIC Master</title>
+    <title>Luyện Từ Vựng TOEIC Master - 1000 Words</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- PDF.js for reading PDF files -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <style>
         /* Custom Styles for Flip Card */
@@ -47,7 +44,7 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- Sidebar Menu (New) -->
+    <!-- Sidebar Menu -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
     <div id="sidebar" class="fixed top-0 left-0 w-72 h-full bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-blue-600 text-white">
@@ -59,9 +56,9 @@
         <div class="flex-grow overflow-y-auto custom-scrollbar p-4" id="lesson-list">
             <!-- Lessons will be injected here -->
         </div>
-        <div class="p-4 border-t border-slate-100 bg-slate-50">
+        <div class="p-4 border-t border-slate-100 bg-slate-50 flex flex-col gap-2">
             <button onclick="toggleSidebar(); toggleSettingsModal();" class="w-full py-2.5 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 rounded-xl font-medium transition-colors text-sm">
-                <i class="fa-solid fa-plus mr-1"></i> Thêm PDF mới
+                <i class="fa-solid fa-gear mr-1"></i> Cài đặt & Dữ liệu
             </button>
         </div>
     </div>
@@ -99,9 +96,9 @@
         
         <!-- Stats Bar -->
         <div class="flex justify-between items-center mb-6 text-sm font-medium text-slate-500 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
-            <div class="font-semibold text-slate-700" id="current-lesson-title">Bài học mặc định</div>
+            <div class="font-semibold text-blue-700" id="current-lesson-title">Đang tải...</div>
             <div class="flex gap-4">
-                <div>Tổng số: <span id="total-words" class="text-blue-600 font-bold text-lg">0</span></div>
+                <div>Số từ: <span id="total-words" class="text-blue-600 font-bold text-lg">0</span></div>
                 <div id="quiz-score-display" class="hidden border-l border-slate-200 pl-4">Điểm: <span id="current-score" class="text-green-600 font-bold text-lg">0</span></div>
             </div>
         </div>
@@ -109,10 +106,8 @@
         <!-- ================= FLASHCARD MODE ================= -->
         <div id="flashcard-view" class="flex-grow flex flex-col items-center w-full max-w-2xl mx-auto">
             
-            <!-- Progress text -->
-            <div class="text-slate-400 mb-2 font-medium" id="flashcard-progress">1 / 20</div>
+            <div class="text-slate-400 mb-2 font-medium" id="flashcard-progress">1 / 30</div>
             
-            <!-- Card Container -->
             <div class="perspective-1000 w-full aspect-[4/3] sm:aspect-[3/2] cursor-pointer group flashcard" id="flashcard" onclick="flipCard()">
                 <div class="flashcard-inner relative w-full h-full shadow-lg rounded-3xl transition-transform duration-500">
                     
@@ -121,15 +116,16 @@
                         <button onclick="playAudio(event)" class="absolute top-4 right-4 w-10 h-10 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors flex items-center justify-center">
                             <i class="fa-solid fa-volume-high text-xl"></i>
                         </button>
-                        <h2 id="fc-word" class="text-4xl sm:text-5xl font-bold text-slate-800 text-center mb-4">Word</h2>
+                        <h2 id="fc-word" class="text-4xl sm:text-5xl font-bold text-slate-800 text-center mb-2">Word</h2>
+                        <!-- Hiển thị Từ loại -->
+                        <span id="fc-pos" class="text-sm font-semibold text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full mb-4 hidden">(n)</span>
                         <p class="text-slate-400 text-sm italic">Chạm để xem nghĩa</p>
                     </div>
                     
                     <!-- Back (Meaning) -->
                     <div class="absolute inset-0 backface-hidden bg-blue-50 rounded-3xl border border-blue-100 flex flex-col items-center justify-center p-8 rotate-y-180">
-                        <h3 id="fc-meaning" class="text-3xl font-semibold text-blue-800 text-center mb-6">Nghĩa của từ</h3>
+                        <h3 id="fc-meaning" class="text-2xl sm:text-3xl font-semibold text-blue-800 text-center mb-6">Nghĩa của từ</h3>
                         
-                        <!-- AI Integration Button -->
                         <button onclick="askAI(event)" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl shadow-md transition-all flex items-center gap-2 font-medium transform hover:scale-105">
                             <i class="fa-solid fa-wand-magic-sparkles"></i> AI Giải thích
                         </button>
@@ -155,9 +151,6 @@
                 <button onclick="prevCard()" class="w-14 h-14 bg-white border border-slate-200 text-slate-600 rounded-full shadow-sm hover:bg-slate-50 hover:text-blue-600 transition-all flex items-center justify-center text-xl">
                     <i class="fa-solid fa-arrow-left"></i>
                 </button>
-                <button onclick="shuffleCards()" class="w-14 h-14 bg-white border border-slate-200 text-slate-600 rounded-full shadow-sm hover:bg-slate-50 hover:text-blue-600 transition-all flex items-center justify-center text-xl" title="Xáo trộn">
-                    <i class="fa-solid fa-shuffle"></i>
-                </button>
                 <button onclick="nextCard()" class="w-14 h-14 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition-all flex items-center justify-center text-xl">
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
@@ -168,11 +161,14 @@
         <div id="quiz-view" class="hidden flex-grow flex-col items-center w-full max-w-2xl mx-auto">
             <div class="w-full bg-white rounded-3xl shadow-lg border border-slate-100 p-6 sm:p-10 text-center">
                 
-                <div class="text-slate-400 mb-4 font-medium" id="quiz-progress">Câu hỏi 1 / 20</div>
+                <div class="text-slate-400 mb-4 font-medium" id="quiz-progress">Câu hỏi 1 / 30</div>
                 
                 <div class="flex items-center justify-center gap-4 mb-8">
-                    <h2 id="quiz-word" class="text-3xl sm:text-4xl font-bold text-slate-800">Word</h2>
-                    <button onclick="playAudioQuiz()" class="text-slate-400 hover:text-blue-500 transition-colors">
+                    <div class="flex flex-col items-center">
+                        <h2 id="quiz-word" class="text-3xl sm:text-4xl font-bold text-slate-800 mb-2">Word</h2>
+                        <span id="quiz-pos" class="text-sm font-semibold text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full hidden">(n)</span>
+                    </div>
+                    <button onclick="playAudioQuiz()" class="text-slate-400 hover:text-blue-500 transition-colors self-start mt-2">
                         <i class="fa-solid fa-volume-high text-xl"></i>
                     </button>
                 </div>
@@ -184,7 +180,7 @@
                     <!-- Options injected via JS -->
                 </div>
 
-                <!-- Next Button (Hidden initially) -->
+                <!-- Next Button -->
                 <button id="btn-next-quiz" onclick="nextQuiz()" class="hidden mt-8 mx-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all">
                     Câu tiếp theo <i class="fa-solid fa-arrow-right ml-2"></i>
                 </button>
@@ -193,49 +189,50 @@
 
     </main>
 
-    <!-- ================= SETTINGS & DATA MODAL ================= -->
+    <!-- ================= SETTINGS MODAL ================= -->
     <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 transform scale-95 transition-transform duration-300 overflow-hidden flex flex-col max-h-[90vh]">
             
-            <!-- Modal Header -->
             <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-database mr-2 text-blue-500"></i> Cài đặt Dữ liệu</h3>
+                <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-database mr-2 text-blue-500"></i> Quản lý Dữ liệu</h3>
                 <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
-            <!-- Modal Body -->
             <div class="p-6 overflow-y-auto custom-scrollbar">
 
-                <!-- Section: PDF Upload -->
+                <!-- Section: Sync / Backup -->
                 <div>
                     <label class="block text-sm font-semibold text-slate-800 mb-2">
-                        <i class="fa-solid fa-file-pdf mr-1 text-red-500"></i> Nhập danh sách từ PDF
+                        <i class="fa-solid fa-cloud-arrow-down mr-1 text-green-500"></i> Đồng bộ qua máy khác (Backup)
                     </label>
                     <p class="text-xs text-slate-500 mb-3">
-                        Hỗ trợ định dạng bảng TOEIC (STT - Từ - Loại từ - Phiên âm - Nghĩa) hoặc định dạng ngăn cách bằng dấu "-" / ":".
+                        Trang web trên GitHub lưu tiến độ Offline. Hãy bấm <b>Xuất dữ liệu</b> để tải file backup, gửi qua máy khác rồi chọn <b>Nhập dữ liệu</b> để tiếp tục học với đúng cấu trúc xáo trộn hiện tại.
                     </p>
-                    
-                    <div class="flex items-center justify-center w-full">
-                        <label for="pdf-upload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-blue-50 hover:border-blue-400 transition-colors">
-                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400 mb-2"></i>
-                                <p class="mb-1 text-sm text-slate-500 font-medium">Click để chọn file PDF</p>
-                                <p class="text-xs text-slate-400">Tối đa 2000 từ</p>
-                            </div>
-                            <input id="pdf-upload" type="file" class="hidden" accept=".pdf" onchange="handlePDFUpload(event)" />
+                    <div class="flex gap-2">
+                        <button onclick="exportData()" class="flex-1 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 py-2 rounded-xl text-sm font-medium transition-colors">
+                            <i class="fa-solid fa-download mr-1"></i> Xuất dữ liệu
+                        </button>
+                        <label class="flex-1 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer text-center flex items-center justify-center">
+                            <i class="fa-solid fa-upload mr-1"></i> Nhập dữ liệu
+                            <input type="file" class="hidden" accept=".json" onchange="importData(event)">
                         </label>
-                    </div>
-                    
-                    <div id="pdf-loading" class="hidden mt-3 text-center text-sm text-blue-600 font-medium">
-                        <i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Đang đọc và phân tích file PDF...
                     </div>
                 </div>
 
-                <div class="mt-6 flex justify-end">
-                    <button onclick="resetToDefaultData()" class="text-sm text-slate-500 hover:text-red-600 underline transition-colors">
-                        Khôi phục từ vựng mặc định
+                <hr class="border-slate-100 my-6">
+
+                <!-- Section: Reshuffle -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-800 mb-2">
+                        <i class="fa-solid fa-shuffle mr-1 text-purple-500"></i> Xáo trộn & Tạo lại bài học
+                    </label>
+                    <p class="text-xs text-slate-500 mb-3">
+                        Tính năng này sẽ tạo mới toàn bộ tiến trình: lấy lại 1000 từ vựng gốc, xáo trộn thứ tự mới và chia lại vào các bài học.
+                    </p>
+                    <button onclick="reshuffleAll()" class="w-full bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 py-2 rounded-xl text-sm font-medium transition-colors">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Xáo trộn lại 1000 từ
                     </button>
                 </div>
             </div>
@@ -244,92 +241,1064 @@
 
     <!-- Configuration & Logic Script -->
     <script>
-        // Setup PDF.js worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        // --- 1000 PRELOADED WORDS WITH PARTS OF SPEECH ---
+        const PRELOADED_DATA = `ability|n|năng lực, khả năng
+abroad|adv|ở nước ngoài
+accept|v|chấp nhận, chấp thuận
+access|n, v|quyền truy cập, sự tiếp cận; truy cập
+accessible|adj|khả năng tiếp cận được
+accident|n|tai nạn, sự tình cờ
+accommodate|v|dàn xếp, hỗ trợ
+accommodation|n|chỗ ở, nơi ở sự điều tiết, hòa giải
+accomplish|v|hoàn thành, thực hiện
+according (to)|prep|theo như, dựa vào
+accordingly|adv|theo đó, vì vậy
+accounting|n|sự tính toán, thanh toán
+accurate|adj|đúng đắn, chính xác
+achieve|v|đạt được, giành được
+acquire|v|thu nạp được, giành được
+act|n, v|hành động; thực hiện
+actually|adv|thực sự, trên thực tế
+adapt|v|thích nghi, thích ứng
+adapter|n|thiết bị chuyển đổi, người điều chỉnh tác phẩm
+additional|adj|thêm vào, phụ thêm
+adjust|v|điều chỉnh
+adjustment|n|sự điều chỉnh, sự thay đổi
+administration|n|sự quản lý, quản trị
+admire|v|ngưỡng mộ, thán phục
+admit|v|thừa nhận; tiếp nhận
+admittance|n|sự thu nạp, đón nhận
+adopt|v|nhận nuôi, làm theo, áp dụng
+advance|n, v|sự tiến lên; tiến lên phía trước
+advanced|adj|tiến bộ, cấp tiến
+advantage|n|lợi thế
+advantageous|adj|có lợi, thuận lợi
+advertise|v|quảng cáo, thông báo
+advertisement|n|bản tin quảng cáo
+advice|n|lời khuyên, lời chỉ bảo
+advise|v|đưa ra lời khuyên
+affect|v|ảnh hưởng, tác động
+afford|v|có khả năng, đủ điều kiện; ban phát, cấp phát
+affordable|adj|có khả năng chi trả, vừa túi tiền
+agency|n|đại lý, bên môi giới trung gian
+agenda|n|chương trình nghị sự, kế hoạch chương trình
+agree|v|đồng ý, tán thành
+agreeable|adj|dễ chịu; thích hợp với
+agreement|n|hợp đồng, giao kèo
+agricultural|adj|thuộc nông nghiệp
+aid|n, v|sự giúp đỡ, cứu trợ, viện trợ
+aim|n, v|mục tiêu; nhắm đến, hướng đến
+airline|n|công ty hàng không
+aisle|n|gian hàng, lối đi giữa các dãy ghế
+alarm|n|sự báo động; báo động
+allow|v|cho phép, để cho
+alternative|adj|xen kẽ, luân phiên
+ambitious|adj|tham vọng
+amend|v|sửa chữa, cải tạo
+amount|n, v|số lượng; cộng dồn lên tới
+amusing|adj|vui, có tính hài hước
+analysis|n|sự phân tích, bản phân tích
+analyze|v|phân tích
+annual|adj|hằng năm
+anticipate|v|phỏng đoán, dự đoán
+anxious|adj|bồn chồn, lo lắng
+apologize|v|xin lỗi
+appeal|n, v|lời thỉnh cầu, sức lôi cuốn; kêu gọi, hấp dẫn
+appetizer|n|món khai vị
+appliance|n|thiết bị, dụng cụ
+applicant|n|người ứng tuyển, nguyên cáo
+application|n|ứng dụng, sự áp dụng
+apply|v|áp dụng, ứng tuyển
+appoint|v|bổ nhiệm, chỉ định
+appointment|n|sự bổ nhiệm, cuộc hẹn gặp
+appreciable|adj|đáng kể
+appreciate|v|đánh giá cao, cảm kích
+appreciation|n|sự đánh giá cao, sự cảm kích
+appreciative of|adj|đánh giá cao, ghi nhận
+apprentice|n|người học việc
+approve|v|tán thành, phê chuẩn
+approximate|adj|xấp xỉ, gần đúng
+arbitrate|v|phân xử, làm trọng tài
+area|n|khu vực, lĩnh vực, diện tích
+argue|v|tranh cãi, tranh luận
+argument|n|cuộc tranh luận
+arrange|v|dàn xếp, sắp đặt
+arrangement|n|sự sắp đặt
+assemble|v|lắp ráp, thu thập
+assess|v|đánh giá, định giá
+asset|n|của cải, tài sản, vốn quý
+assign|v|phân công, chia việc
+assignment|n|sự phân việc, bài tập tiểu luận
+assist|v|hỗ trợ, giúp đỡ
+assistance|n|sự giúp đỡ, hỗ trợ
+assume|v|cho rằng, làm ra vẻ
+attach|v|gán thêm, kèm thêm
+attachment|n|sự gắn thêm, phần kèm thêm
+attend|v|tham dự
+attendance|n|sự tham gia, có mặt
+attract|v|thu hút, hấp dẫn
+audience|n|khán thính giả
+audit|n, v|kiểm toán
+authority|n|quyền thế, nhà chức trách, chính quyền
+authorize|v|ủy quyền, cấp quyền
+availability|n|tính sẵn có
+available|adj|có sẵn để dùng
+avoid|v|tránh xa, ngăn ngừa
+avid|adj|khao khát, thèm khát
+awareness|n|sự nhận thức, ý thức
+awkward|adj|ngại ngùng, khó xử
+background|n|phông nền, gia cảnh, quá trình học tập
+backpack|n|ba lô đeo sau lưng
+baggage claim|n|chỗ nhận hành lý
+balance|n|sự cân bằng, trạng thái cân bằng
+bank|n|ngân hàng, bãi sông
+bankrupt|n, adj|người phá sản; vỡ nợ, phá sản
+bar code|n|mã vạch
+bargain|n, v|sự mặc cả, món hời, mặc cả, thương lượng
+beautiful|adj|xinh đẹp, tốt đẹp
+behave|v|hành xử, cư xử
+belongings|n|tài sản, đồ dùng cá nhân
+beneficial|adj|có ích, có lợi
+benefit|n|ích lợi
+beverage|n|đồ uống, đồ giải khát
+bill|n|hóa đơn
+binder|n|bìa ôm, bìa rời
+blanket|n|chăn, mền
+block|n, v|khối, tảng, chướng ngại vật làm cản trở, phong tỏa
+board|n|tấm ván, bảng, mạn thuyền
+boardroom|n|phòng họp ban giám đốc
+boast|n, v|sự khoe khoang, khoác lác
+book|n, v|cuốn sách; đặt phòng, đặt vé
+boost|v, n|đẩy mạnh, kích thích; sự tăng lên
+bored|adj|buồn chán, tẻ nhạt
+bother|n, v|điều gây khó chịu; làm phiền, bận tâm
+bottom line|n|điểm mấu chốt, cốt yếu
+branch|n|cành cây, chi nhánh
+brand|n|nhãn hàng, thương hiệu
+briefcase|n|cặp tài liệu
+briefing|n|sự chỉ dẫn, hướng dẫn
+broadcast|n, v|chương trình phát thanh; truyền bá, phát thanh
+broaden|v|mở rộng, nới rộng
+browser|n|trình duyệt
+brush|n, v|lược, bàn chải; chải, quét
+budget|n, v|ngân sách; dự thảo ngân sách
+bulletin|n|bảng thông báo, tập san
+cabin crew|n|đội bay, tiếp viên hàng không
+cafeteria|n|quán ăn tự phục vụ, phòng cà phê
+calculate|v|tính toán, suy tính
+calculation|n|sự tính toán
+calculator|n|máy tính bỏ túi
+campaign|n|chiến dịch, cuộc vận động
+cancel|v|hủy bỏ, xóa
+cancellation|n|sự xóa bỏ, bãi bỏ
+candidacy|n|sự ứng cử
+candidate|n|ứng cử viên
+capacity|n|năng lực, sức chứa
+capital|n|thủ đô, nguồn vốn, chữ viết hoa
+career|n|sự nghiệp
+careless|adj|bất cẩn, cẩu thả
+cash|n|tiền mặt
+cashier|n|nhân viên thu ngân
+cause|n, v|nguyên nhân, lý do; gây ra
+cautious|adj|thận trọng, cẩn thận
+celebrate|v|kỉ niệm, tán dương
+celebration|n|lễ kỉ niệm
+certificate|n|giấy chứng nhận
+certification|n|sự cấp giấy chứng nhận
+chain|n|dây xích, chuỗi
+chain store|n|cửa hàng theo chuỗi, hệ thống cửa hàng
+chair|n|ghế ngồi
+chairperson|n|chủ tịch
+characteristic|n|đặc điểm, tính cách
+characterize|v|biểu thị đặc điểm, mô tả đặc điểm
+charge|n, v|chi phí, tiền công, tính giá, đòi trả
+charity|n|lòng từ bi, tổ chức từ thiện
+cheap|adj|rẻ tiền, xấu
+check in|v|đăng ký phòng, vé máy bay...
+check out|v|trả phòng, thanh toán
+chef|n|đầu bếp
+circumstances|n|hoàn cảnh, tình huống
+claim|n, v|quyền đòi sở hữu, đòi hỏi, nhận
+claimant|n|người thỉnh cầu, người đòi hỏi
+classify|v|phân loại
+client|n|khách hàng (của luật sư, cửa hàng...)
+climate|n|khí hậu, thời tiết
+commence|v|bắt đầu, mở đầu, khởi đầu
+commission|n|hội đồng, ủy ban, tiền hoa hồng
+committee|n|ủy ban
+commonly|adv|thông thường, bình thường
+commute|v|di chuyển đều đặn bằng tàu, xe...
+commuter|n|người đi lại bằng vé tháng trên tàu, xe...
+company|n|công ty, bạn bè, bằng hữu
+compare|v|so sánh, đối chiếu
+compatible|adj|tương thích, phù hợp
+compensate|v|đền bù, bồi thường
+compensation|n|sự đền bù, vật bồi thường
+competent|adj|có khả năng, đủ trình độ
+competitive|adj|có tính cạnh tranh, ganh đua
+competitor|n|người cạnh tranh, đối thủ
+complain|v|kêu ca, phàn nàn, oán trách
+complaint|n|lời than phiền, lời phàn nàn
+complete|adj|đầy đủ, hoàn thiện
+complex|n, adj|khu phức hợp, phức tạp
+complexity|n|sự phức tạp
+compliment|n|lời khen, sự ca tụng
+complimentary|adj|ngợi khen, đánh giá cao
+comply|v|tuân theo, làm theo
+comprehensive|adj|toàn diện, thông minh
+compromise|n, v|sự thỏa hiệp, dàn xếp, thỏa hiệp
+compulsory|adj|bắt buộc, ép buộc
+concede|v|thừa nhận
+concern|n, v|mối bận tâm, chuyện đáng lo; liên quan, dính líu tới
+conclude|v|kết thúc, chấm dứt, kết luận
+conclusion|n|kết luận
+concourse|n|đám đông, sự tụ họp
+condition|n, v|điều kiện, tình cảnh, tình trạng; là điều kiện của, tùy thuộc vào
+conduct|n, v|hạnh kiểm, đạo đức; tiến hành, chỉ đạo
+confirmation|n|sự xác nhận, chứng thực
+confusion|n|sự bối rối, khó hiểu
+connect|v|nối lại, kết nối
+consequence|n|hậu quả, kết quả
+considerable|adj|đáng kể, lớn lao
+consignment|n|hoạt động gửi hàng để bán
+consistently|adv|kiên định, trước sau như một, đồng nhất
+constant|adj|liên tục, liên tiếp, kiên trì
+consultant|n|tư vấn viên, cố vấn
+consume|v|sử dụng, tiêu dùng, tiêu thụ
+consumer|n|người tiêu dùng
+continual|adj|liên tục, liên miên
+continue|v|tiếp tục, duy trì
+contribute|v|đóng góp, góp phần
+control|n, v|sự điều khiển, cầm lái; điều khiển, chỉ huy, kiểm soát
+control panel|n|bảng điều khiển
+conveniently|adv|thuận tiện, tiện lợi
+convince|v|thuyết phục
+corporate|n, v|công ty, tập đoàn; (thuộc) đoàn thể
+corporation|n|đoàn thể, tập đoàn
+cost|n, v|giá, chi phí, định giá, trả giá
+counter|n, v|quầy hàng, quầy thu ngân; phản đối, chống lại
+courier|n|người đưa thư, đưa tin
+cover letter|n|thư trình bày thông tin, nguyện vọng
+coverage|n|mức độ bao phủ, che phủ bản tin sự kiện
+coworker|n|đồng nghiệp
+crash|n, v|sự va đập, sụp đổ; rơi vỡ, va đập
+credentials|n|giấy ủy nhiệm, chứng chỉ
+credit|n|danh tiếng, tín dụng, tín chỉ
+criterion|n|tiêu chí đánh giá
+critical|adj|phê bình, phê phán nguy kịch
+criticize|v|phê bình, chỉ trích
+crowd|n, v|đám đông, đống, xúm lại, tụ tập
+crowded|adj|đông đúc nhiều, đầy
+crucial|adj|có tính quyết định, trọng yếu
+cruise|n, v|chuyến du lịch, đi chơi trên biển; đi chơi bằng tàu thủy
+currency|n|tiền tệ
+current|n, adj|dòng, luồng; hiện tại, hiện thời
+custom|n|phong tục, tục lệ
+customer|n|khách hàng
+cutting edge|adj|đột phá, vượt trội
+cycle|n|chu kỳ, chu trình
+daily|adj|hằng ngày
+damage|n|mối gây hại; làm hại, hư hỏng
+deadline|n|hạn cuối, hạn hoàn thành
+deal|n, v|thỏa thuận mua bán; giải quyết, đối phó
+debit|n|món nợ, ghi nợ
+debt|n|khoản nợ
+decision|n|quyết định
+decorate|v|trang trí, trang hoàng
+decrease|n|sự sụt giảm; làm giảm đi
+dedicate|v|cống hiến, tận hiến
+deduct|v|khấu trừ, trừ đi
+definite|adj|xác định rõ, rõ ràng
+definitely|adv|rõ ràng, dứt khoát, chắc chắn
+degree|n|mức độ, trình độ, cấp bậc độ, nhiệt độ
+delay|n, v|sự chậm trễ, trì hoãn; làm chậm, hoãn lại
+delighted|adj|hài lòng, vui mừng
+deliver|v|phân phối, giao hàng, đem tới phát biểu
+delivery|n|sự phân phát, giao hàng sự phát biểu
+demand|n, v|sự đòi hỏi; yêu cầu
+demanding|adj|yêu cầu cao, đòi hỏi khắt khe
+demonstrate|v|làm mẫu, giải thích biểu tình
+depart|v|rời đi từ giã
+department|n|khoa, bộ
+depend|v|phụ thuộc, lệ thuộc
+dependence|n|sự phụ thuộc
+deposit|n, v|tiền cọc; đặt cọc
+description|n|bản mô tả, sự mô tả
+designate|v|chỉ định, bổ nhiệm
+dessert|n|món tráng miệng
+destination|n|đích đến, điểm đến dự định
+detail|n, v|chi tiết, tiểu tiết; trình bày chi tiết, làm rõ
+detailed|adj|chi tiết, cụ thể
+detect|v|dò ra, tìm ra, phát hiện
+deterioration|n|sự hư hại, xuống cấp, sa đọa
+determine|v|xác định rõ, định rõ quyết định, quyết tâm
+determined|adj|quyết tâm, kiên quyết
+develop|v|phát triển, tiến triển
+developer|n|người phát triển, lập trình viên
+development|n|sự phát triển
+device|n|thiết bị, máy móc phương sách
+diagnose|v|chẩn đoán
+differential|adj|khác biệt, chênh lệch
+diligent|adj|chăm chỉ, cần cù
+director|n|giám đốc, người điều hành, đạo diễn
+disagree|v|bất đồng, không khớp với nhau
+disagreement|n|sự bất đồng, mối bất hòa, mâu thuẫn
+disappointing|adj|đáng thất vọng
+disconnect|v|ngắt kết nối
+discount|n, v|sự giảm giá, chiết khấu; giảm giá, bớt giá
+discrepancy|n|khác biệt, chênh lệch, điểm không đồng nhất
+discrimination|n|sự phân biệt đối xử
+discuss|v|thảo luận, tranh luận
+discussion|n|cuộc tranh luận, thảo luận
+dish|n|đĩa đựng thức ăn, món ăn
+dismiss|v|giải tán, thải hồi
+dismissive|adj|thô bạo, tùy tiện
+display|n, v|sự bày biện; trưng bày, phô diễn
+disposable|adj|dùng một lần, sẵn có để dùng
+dispose|v|vứt bỏ, giải quyết
+dispute|n, v|cuộc bàn cãi, cuộc tranh luận; tranh luận
+disruption|n|sự phá vỡ, đập gãy
+distinctive|adj|đặc biệt, độc đáo
+distinguish|v|phân biệt, nhận ra
+distribute|v|phân phát, phân bổ
+distribution|n|sự phân phát
+dividend|n|số bị chia
+document|n|văn kiện, tài liệu; dẫn chứng tư liệu
+donate|v|quyên góp, đóng góp
+donation|n|sự quyên góp, sự hiến tặng
+double|n, adj, adv|nhân đôi, gấp đôi
+download|v|tải xuống
+downsize|v|cắt giảm
+downturn|n|sự suy sụp
+downward|adv|trở xuống, trở về sau
+drastically|adv|mạnh mẽ, quyết liệt
+draw|v|kéo, lôi, thu hút vẽ
+drawer|n|ngăn kéo
+drive|n, v|cuộc đua lái xe
+dull|adj|chậm hiểu, đần độn cùn
+duration|n|khoảng thời gian, thời hạn
+duty-free|adj, adv|miễn thuế
+earn|v|kiếm được, giành được
+earnings|n|số tiền kiếm được
+economical|adj|tiết kiệm, kinh tế
+economize|v|tiết kiệm
+economy|n|nền kinh tế
+effective|adj|hiệu quả, có hiệu lực
+effectively|adv|có hiệu quả
+effectiveness|n|sự hiệu quả
+efficiency|n|năng lực, hiệu suất, năng suất
+efficient|adj|năng suất cao, hiệu suất tốt
+efficiently|adv|có hiệu nghiệm
+elderly|adj|có tuổi, lớn tuổi
+elevator|n|thang máy, máy nâng
+embark|v|bắt đầu, lên đường, dấn thân vào
+emergency|n|trường hợp khẩn cấp
+emphasize|v|nhấn mạnh
+employer|n|người làm chủ, người sử dụng lao động
+employment|n|việc làm, sự thuê người làm
+enable|v|cho phép, làm cho có khả năng làm gì đó
+enclose|v|vây quanh, rào quanh, gửi kèm
+encourage|v|động viên, cổ vũ
+endure|v|chịu đựng, cam chịu
+engineer|n|kỹ sư
+engineering|n|công việc kỹ sư
+enhance|v|làm tăng thêm, đề cao, đẩy mạnh
+enlighten|v|làm sáng tỏ, khai sáng
+enroll|v|đăng ký, ghi tên
+ensure|v|bảo đảm, chắc chắn
+enterprise|n|xí nghiệp, doanh nghiệp
+enthusiastic|adj|nhiệt tình, hứng khởi
+enthusiastically|adv|hăng say, nhiệt tình
+entitlement|n|quyền hạn, sự được phép làm
+entrée|n|món chính sự gia nhập, thâm nhập, tiến vào
+environment|n|môi trường
+environmental|adj|thuộc môi trường
+equivalent|adj, n|tương đương, vật tương đương
+essential|adj|thuộc bản chất, cốt lõi
+estimate|v|ước tính, dự đoán
+evaluate|v|ước lượng, đánh giá
+evolve|v|tiến hóa
+event|n|sự kiện, sự việc
+evidence|n|bằng chứng, chứng cớ
+exact|adj|chính xác, đúng
+examination|n|sự khám xét, kỳ thi
+examine|v|khảo sát, kiểm tra
+excel|v|hơn, vượt trội
+excellent|adj|xuất sắc, ưu tú
+executive|adj, n|thuộc chấp hành, sự thi hành; tổ chức hành pháp
+exhibit|v|trưng bày, triển lãm
+expand|v|mở rộng, nở phồng
+expansion|n|sự mở rộng, giãn nở
+expect|v|chờ đợi, trông chờ
+expectation|n|sự mong chờ, ngóng đợi
+expenditure|n|sự tiêu dùng, phí tổn
+expense|n|chi phí, sự tiêu dùng
+expensive|adj|đắt tiền, đắt đỏ
+experience|n|trải nghiệm, kinh nghiệm
+experienced|adj|người từng trải, người có kinh nghiệm
+experiment|n, v|thí nghiệm, thử nghiệm
+exploration|n|cuộc thăm dò, thám hiểm
+express|n, v|công văn hỏa tốc; trình bày, diễn đạt
+extend|v|duỗi thẳng, nới rộng, gia hạn
+extension|n|sự mở rộng, gia hạn
+external|adj|bên ngoài, đối ngoại
+facility|n|điều kiện thuận lợi, sự dễ dàng, thuận lợi
+factor|n|nhân tố
+factory|n|nhà máy, xí nghiệp
+fail|v|thất bại, trượt kỳ thi
+failure|n|sự thất bại
+fair|n, adj|hội chợ, phiên chợ, công bằng, không thiên vị
+famed|adj|nổi tiếng, lừng danh
+fare|n, v|tiền xe, tiền vé đi đường, đi du lịch
+fault|n|lỗi, sai lầm
+faulty|adj|có thiếu sót, mắc khuyết điểm
+favor|n, v|thiện ý, sự yêu mến; ưu đãi, thiên vị
+fax|n|bản fax
+feature|n|nét, đặc điểm
+fee|n|lệ phí, tiền thù lao
+feedback|n, v|phản hồi, góp ý
+figure|n, v|hình dáng, nhân vật; đánh giá, tính toán
+file|n|hồ sơ, túi đựng tài liệu
+fill|v|làm đầy, nhồi nhét
+final|adj|cuối cùng
+finance|n, v|tài chính; hỗ trợ tài chính
+financial|adj|thuộc tài chính
+fix|n, v|sửa chữa gắn chặt, cố định
+flexible|adj|linh hoạt, không cố định
+flight|n|chuyến bay, sự rút chạy
+flight attendant|n|tiếp viên hàng không
+fluctuate|v|dao động, lên xuống
+fluctuation|n|sự dao động
+focus|v, n|tập trung
+focused|adj|tập trung, chú ý
+fold|v, n|gấp, vén; nếp gấp
+folder|n|bìa cứng, xấp tài liệu
+force|n|sức mạnh, quyền lực
+forecast|n, v|dự đoán, tiên đoán
+foreign|adj|nước ngoài, ngoại quốc
+forget|v|quên
+forgetful|adj|tính hay quên, có trí nhớ tồi
+form|n|dáng hình; tạo hình
+forward|adv|về phía trước, tiến lên
+frank|adj|ngay thẳng, bộc trực
+frankly|adv|thẳng thắn
+fuel|n|chất đốt, nhiên liệu
+fulfill|v|làm đầy
+function|v, n|hoạt động; chức năng
+functional|adj|thuộc chức năng
+fundraising|n|sự huy động vốn
+furniture|n|đồ đạc
+further|adj, adv|xa hơn, kỹ hơn
+gesture|n|điệu bộ, cử chỉ
+goal|n|khung thành, cầu môn, mục tiêu
+goods|n|của cải, hàng hóa
+gradually|adv|dần dần, từ từ
+grievance|n|lời than trách
+grill|n, v|chả nướng; nướng, thiêu đốt
+growth|n|sự tăng trưởng, mức độ tăng trưởng
+guarantee|n, v|sự đảm bảo; cam kết
+guideline|n|quy tắc, nguyên tắc
+haggle|n, v|sự mặc cả; tranh cãi
+handle|n, v|cán cầm, tay cầm; xử lý
+handy|adj|thuận tiện, sẵn tiện
+harbor|n, v|bến cảng; che giấu, nuôi dưỡng
+harmful|adj|gây tai hại, có hại
+hazardous|adj|mạo hiểm, nguy hiểm
+head office|n|cơ quan đầu não, tổng công ty
+headquarters|n|sở chỉ huy, bộ chỉ huy
+hesitate|v|do dự, ngập ngừng
+hesitation|n|sự ngập ngừng, do dự
+hide|n, v|che giấu, che đậy
+highlight|n, v|điểm nổi bật; làm nổi bật
+highly|adv|rất, lắm, tốt
+hike|n|cuộc đi bộ, cuộc hành quân; đi bộ đường dài
+hire|n, v|sự thuê; thuê, mướn
+hold|n, v|sự cầm, nắm; cầm, giữ
+host|n, v|chủ nhà, người chủ trì; tổ chức, đăng cai
+identification|n|sự phát hiện, nhận diện
+identify|v|nhận diện, nhận biết
+imaginative|adj|tưởng tượng, không có thực
+immediate|adj|ngay lập tức, trực tiếp
+immediately|adv|ngay lập tức, tức thì
+impact|n, v|tác động, ảnh hưởng
+impatient|adj|thiếu kiên nhẫn
+impersonate|v|mạo danh, đóng vai, nhại lại
+implement|n, v|dụng cụ, phương tiện; thi hành, thực hiện, áp dụng
+imply|v|ngụ ý, ý nói
+impression|n|ấn tượng, dấu vết
+improper|adj|không thích hợp, không phù hợp
+improve|v|cải thiện
+improvement|n|sự cải thiện, cải tiến
+incentive|adj, n|khuyến khích; sự khích lệ, thúc đẩy
+inclined|adj|có thiên hướng, khuynh hướng
+include|v|bao gồm, gồm có
+inclusion|n|sự bao gồm, tính vào
+income|n|thu nhập, lợi tức
+inconvenience|n|sự bất tiện, phiền hà
+increase|v, n|sự tăng lên; tăng thêm
+indicate|v|chỉ ra, chứng tỏ, biểu thị
+indication|n|sự biểu thị, biểu lộ
+individual|n, v|cá nhân; riêng lẻ, tách biệt
+individually|adv|riêng lẻ
+inexperienced|adj|thiếu kinh nghiệm
+infer|v|suy ra, kết luận
+inflate|v|bơm phồng, thổi phồng
+inflation|n|sự bơm phồng, lạm phát
+influence|v|ảnh hưởng, uy lực; chi phối, tác động
+influential|adj|có ảnh hưởng, có tác dụng
+information|n|thông tin
+input|n|dữ liệu đầu vào
+inquiry|n|sự điều tra, thẩm vấn
+install|v|cài đặt, tải xuống
+installation|n|sự cài đặt
+insurance|n|sự bảo hiểm, hợp đồng bảo hiểm
+insure|v|bảo hiểm, đảm bảo
+intend|v|định, có ý định
+intention|n|dự định, ý định
+intently|adv|chăm chú, chú ý
+intern|n|thực tập sinh
+internal|adj|bên trong, nội bộ
+international|adj|quốc tế, đa quốc gia
+internship|n|kỳ thực tập
+interrupt|v|làm gián đoạn, ngắt quãng
+interview|n, v|phỏng vấn
+invaluable|adj|vô giá
+invent|v|phát minh, sáng chế
+invention|n|sự phát minh, sáng kiến, sáng chế
+inventory|n|sự kiểm kê, bản kiểm kê
+invest|v|đầu tư
+investigation|n|sự điều tra, nghiên cứu
+investment|n|sự đầu tư, vốn đầu tư
+invite|v|mời, rủ lôi cuốn, hấp dẫn
+invoice|n|hóa đơn
+isolate|v|cô lập, cách ly
+item|n|món đồ, tin tức
+itemize|v|trình bày thành từng khoản, từng món
+itinerary|n|hành trình, lịch trình
+jealous|adj|ghen ghét, đố kỵ
+jeopardize|v|gây nguy hại, đe dọa
+jeopardy|n|nguy cơ, sự nguy hiểm
+jobless|adj|thất nghiệp, không có việc làm
+join|v|nối, ghép, tham gia
+joint|n, adj|mối nối, khớp; chung
+journal|n|báo, tạp chí
+journey|n|cuộc hành trình
+judge|n, v|quan toà, thẩm phán, người phán xử, xét xử, phân xử
+justice|n|sự công bằng, luật pháp
+justification|n|sự bào chữa, biện hộ
+justify|v|bào chữa, phân bua, biện hộ
+keen|adj|say mê, ham thích
+keep|v|giữ lại, giam giữ
+knowledge|n|kiến thức, sự hiểu biết
+knowledgeable|adj|thông thạo, thành thạo, am tường
+label|n|nhãn, nhãn hiệu
+labor|n|lao động, công việc chân tay
+lack|n, v|sự thiếu, thiếu sót
+landlord|n|chủ nhà (nhà cho thuê)
+laptop|n|máy tính
+launch|n|xuồng lớn
+law|n|luật, nội quy, quy định
+lay|n|bài thơ ngắn, bài vè ngắn
+leak|n|lỗ thủng, lỗ rò, khe hở
+lean|n|độ nghiêng, độ dốc
+lease|n|hợp đồng cho thuê (bất động sản)
+leisure|n|thì giờ rỗi rãi, lúc thư nhàn
+lend|v|cho vay, cho mượn
+liability|n|trách nhiệm pháp lý, nghĩa vụ pháp lý
+license|n|bản quyền
+licensing|n|sự cấp giấy phép
+lie|n|sự nói dối, sự nói láo, sự nói điêu, sự dối trá
+limited|adj|hạn chế, có giới hạn
+limousine|n|xe hơi
+list|n|danh sách, sổ, bản kê khai
+livestock|n|vật nuôi, thú nuôi
+loan|n|sự vay nợ
+lobby|n|hành lang
+local|adj|địa phương
+locate|v|trụ sở ở, nằm ở
+log on|v|kết nối với hệ thống
+log|n|khúc gỗ mới đốn hạ
+loyal|adj|trung thành, trung nghĩa, trung kiên
+luggage|n|hành lý
+luxurious|adj|sang trọng, lộng lẫy; xa hoa
+luxury|n|sự xa xỉ, sự xa hoa
+maintain|v|giữ gìn, duy trì bảo vệ
+maintenance|n|sự giữ gìn, sự duy trì; sự bảo vệ
+major|n|chuyên đề
+manage|v|quản lý
+managerial|adj|thuộc người quản lý, thuộc giám đốc
+mandatory|adj|có tính cách bắt buộc
+manufacture|n|sự chế tạo, sự sản xuất
+manufacturing|n|sự sản xuất, sự chế tạo; sự gia công
+marketing|n|tiếp thị
+mechanic|n|thợ máy, công nhân cơ khí
+medical|adj|thuộc y học
+medication|n|sự bốc thuốc, sự cho thuốc
+medicine|n|y học
+meeting|n|cuộc mít tinh, cuộc biểu tình
+membership|n|tư cách hội viên, địa vị hội viên
+memorandum|n|bản ghi nhớ
+mention|n|sự kể ra, sự nói đến, sự đề cập
+merchandise|n|hàng hóa
+mere|n|ao hồ
+merge|v|hoà vào; kết hợp; hợp nhất
+merger|n|sự liên doanh liên kết
+mileage|n|tổng số dặm đã đi được
+million|n|một triệu
+mimic|adj|giả; bắt chước
+mishear|v|nghe lầm
+misleading|adj|làm cho lạc đường, làm cho lạc lối
+misrepresent|v|trình bày sai, miêu tả sai
+monitor|n|lớp trưởng, cán bộ lớp (ở trường học)
+monument|n|vật kỷ niệm, đài kỷ niệm, bia kỷ niệm
+moral|adj|thuộc đạo đức, phẩm hạnh tinh thần bài học, lời răn dạy
+mortgage|n|cầm cố, thế chấp
+motivate|v|thúc đẩy, làm động cơ thúc đẩy
+motivation|n|sự thúc đẩy, động cơ thúc đẩy
+napkin|n|khăn ăn
+narrow|adj|hẹp, chật hẹp, eo hẹp
+narrowing|n|sự thu hẹp, sự co hẹp
+neighborhood|n|hàng xóm
+network|n|lưới, đồ dùng kiểu lưới
+nominate|v|chỉ định, chọn, bổ nhiệm
+nomination|n|sự chỉ định, sự bổ nhiệm
+notice|n|thông tri, yết thị, thông báo
+notify|v|báo, khai báo; thông báo
+objection|n|sự phản đối, sự chống đối
+objective|adj|khách quan
+obligation|n|nghĩa vụ; bổn phận
+oblige|v|bắt buộc, cưỡng bách; đặt nghĩa vụ cho
+obtain|v|đạt được, giành được, thu được
+obviously|adv|một cách rõ ràng; có thể thấy được
+occupation|n|sự chiếm giữ, sự chiếm đóng
+occur|v|xảy ra, xảy đến, xuất hiện, tìm thấy
+officer|n|sĩ quan
+official|adj|thuộc chính quyền; thuộc văn phòng
+onward|adj|về phía trước, tiến lên, hướng tới
+operate|v|hoạt động đang làm việc, thi hành (máy...)
+operation|n|sự hoạt động, quá trình hoạt động
+opinion|n|ý kiến, quan điểm
+opportunity|n|cơ hội, thời cơ, dịp may
+optimistic|adj|lạc quan, yêu đời
+order|n|thứ, bậc, ngôi, hàng, cấp, loại, giai cấp
+organization|n|sự tổ chức, sự cấu tạo
+organize|v|tổ chức, cấu tạo, thiết lập
+organized|adj|có trật tự, ngăn nắp, hữu hiệu
+outline|n|nét phác thảo, đề cương sự vạch ra những nét chính
+outlook|n|quang cảnh, viễn cảnh
+outstanding|adj|nổi bật, đáng chú ý; nổi tiếng, vượt trội
+overall|adj|toàn bộ, toàn thể, bao gồm mọi thứ
+overdraft|n|số tiền chi trội; số tiền rút quá số tiền gửi
+overtime|adj|quá giờ, ngoài giờ (quy định)
+overview|n|sự khái quát; miêu tả chung, ngắn gọn
+owe|v|nợ, hàm ơn
+package|v, n|đóng gói, đóng kiện, xếp vào bao bì, gói đồ, bưu kiện
+parcel|n|gói; bưu kiện
+parking|n|bãi đỗ xe
+participant|n|người tham gia, người tham dự
+particularly|adv|đặc biệt, đặc thù cá biệt, riêng biệt
+passenger|n|hành khách (đi tàu xe...)
+patent|adj|tài tình, khéo léo, tinh xảo
+patented|adj|đã có bằng sáng chế, môn bài
+patience|n|tính kiên nhẫn, tính nhẫn nại; sự bền chí
+payment|n|sự trả tiền, số tiền trả; sự bồi thường, tiền bồi thường
+perform|v|biểu diễn, trình diễn (kịch, điệu nhảy...); đóng
+performance|n|sự biểu diễn, việc đóng (phim, kịch...); cuộc biểu diễn
+permanent|adj|lâu dài, vĩnh cửu; thường xuyên
+permission|n|sự cho phép, sự chấp nhận; giấy phép
+permit|v|cho phép, cho cơ hội; thừa nhận
+personal|adj|cá nhân, tư, riêng
+personalized|v|cá nhân hoá
+personnel|n|nhân viên, công chức (cơ quan, nhà máy...)
+persuade|v|thuyết phục
+pessimistic|adj|bi quan, yếm thế
+plant|n|thực vật
+platform|n|nền, bục, bệ
+pleasant|adj|vui vẻ, dễ thương (người...)
+plow|n|cái cày; công cụ giống như cái cày
+plug|n|phích cắm, ổ cắm điện
+plumber|n|thợ hàn chì, thợ ống nước
+point|n|điểm
+pointless|adj|vô nghĩa, không ý vị, lạc lõng
+policy|n|chính sách (của chính phủ, đảng...)
+polite|adj|lễ phép, có lễ độ; lịch sự, lịch thiệp
+politician|n|nhà chính trị, chính khách
+politics|n|hoạt động chính trị, công việc chính trị
+poll|n|sự bầu cử, số phiếu bầu
+pollute|v|làm ô nhiễm, làm nhơ bẩn (nước...)
+popular|adj|được nhiều người ưa chuộng, được nhiều người ngưỡng mộ
+popularity|n|tính đại chúng tính phổ biến
+position|n|vị trí, chỗ (của một vật gì)
+postpone|v|hoãn lại, trì hoãn
+postponement|n|sự trì hoãn; trường hợp bị trì hoãn
+potential|adj|tiềm năng; tiềm tàng
+power|n|khả năng; tài năng, năng lực
+practical|adj|thực hành (đối với lý thuyết)
+practically|adv|về mặt thực hành (đối với lý thuyết)
+predict|v|nói trước, tiên đoán, dự đoán
+predictable|adj|có thể đoán trước, có thể dự đoán, dự báo
+prefer|v|thích hơn, ưa hơn
+preference|n|sở thích; sự thích hơn, sự ưa hơn
+premises|n|biệt thự
+present|n|hiện tại, hiện thời, hiện giờ, hiện nay
+press|n|sự ép, sự nén, sự bóp, sự ấn
+prevent|v|ngăn cản; ngăn chặn, ngăn ngừa
+prevention|n|sự ngăn cản, sự ngăn trở
+priceless|adj|vô giá; không định giá được
+principle|n|gốc, nguồn gốc, yếu tố cơ bản
+priority|n|sự ưu thế (về cấp bậc); quyền ưu tiên
+private|adj|riêng, tư, cá nhân
+probability|n|sự có thể có, khả năng có thể xảy ra
+probably|adv|có khả năng, có lẽ, có thể
+probationary|adj|đang trong thời gian thử thách
+process|n|quá trình, sự tiến triển
+profession|n|nghề, nghề nghiệp
+professional|adj|thuộc nghề, thuộc nghề nghiệp; có tay nghề
+profile|n|tiểu sử sơ lược; mô tả sơ lược
+profit|n|thuận lợi, lợi ích, bổ ích
+profitability|n|sự có lợi, sự có ích; sự thuận lợi
+profitable|adj|có lợi, có ích; thuận lợi
+progressive|adj|tiến lên, tiến tới
+prohibit|v|cấm, ngăn cấm
+project|n|đề án, dự án; kế hoạch
+promote|v|thăng chức, thăng cấp; đề bạt
+promotion|n|sự thăng chức, sự đề bạt
+promptly|adv|mau lẹ, nhanh chóng; ngay lập tức
+properly|adv|đúng đắn, hợp thức, hợp lệ
+property|n|tài sản, của cải, vật sở hữu, người giàu có
+protect|v|bảo vệ, bảo hộ, che chở
+protection|n|sự bảo vệ, sự bảo hộ, sự che chở
+publicity|n|sự công khai
+publicize|v|đưa ra công khai; làm cho thiên hạ biết đến
+purchase|n|sự mua, tậu; vật mua được, vật tậu được
+purpose|n|mục đích, ý định
+pursue|v|đuổi theo, đuổi bắt, truy nã, truy kích
+qualification|n|phẩm chất, năng lực
+qualified|adj|đủ tư cách, khả năng, điều kiện
+qualify|v|đủ tư cách, khả năng, điều kiện
+questionnaire|n|bản câu hỏi (để điều tra, để thăm dò ý kiến)
+quotation|n|sự trích dẫn, sự được trích dẫn
+quote|n|lời trích dẫn; đoạn trích dẫn
+range|n|dãy, hàng
+rare|adj|hiếm, hiếm có, ít có
+rate|n|tỷ lệ
+rational|adj|có lý trí, dựa trên lý trí
+raw|adj|sống, thô
+reach|n|sự chìa ra, sự trải ra
+realize|v|thấy rõ, hiểu rõ, nhận thức rõ (việc gì...)
+rearrange|v|sắp xếp lại, bố trí lại, sắp đặt lại
+reasonable|adj|có lý, hợp lý
+reasonably|adv|hợp lý
+receipt|n|công thức (làm bánh, nấu món ăn...)
+receive|v|nhận, lĩnh, thu
+recent|adj|gần đây, xảy ra gần đây, mới đây
+reception|n|sự nhận, sự thu nhận, sự lĩnh
+receptive|adj|dễ tiếp thu, dễ lĩnh hội
+recipe|n|công thức làm món ăn
+recognize|v|công nhận, thừa nhận, chấp nhận
+recommend|v|giới thiệu, tiến cử (người, vật...)
+recommendation|n|sự giới thiệu, sự tiến cử
+recruit|v|tuyển, chiêu mộ (lính mới); tìm thêm
+recruitment|n|sự tuyển mộ (lính), sự lấy thêm
+reduce|v|thu nhỏ, làm giảm bớt
+reduction|n|sự thu nhỏ, sự giảm bớt
+redundant|adj|thừa, dư
+refrigerator|n|tủ lạnh
+refund|n, v|trả lại, sự trả lại
+refundable|adj|có thể được trả lại tiền
+refusal|n|sự từ chối, sự khước từ, sự bị từ chối
+refuse|v|từ chối, khước từ, cự tuyệt
+regarding|n|về (ai cái gì), về việc, đối với (vấn đề...)
+regardless|adv|bất chấp, không đếm xỉa tới, không chú ý tới
+regional|adj|thuộc vùng; địa phương
+registration|n|sự đăng ký, sự ghi vào số
+regret|n, v|hối tiếc; sự ân hận
+regular|adj|đều đặn, thường xuyên
+regularly|adv|đều đặn, thường xuyên
+regulate|v|điều khiển
+reject|n, v|vật bị loại, vật bỏ đi, vật không được chọn
+relax|v|thư giãn, nghỉ ngơi
+relaxation|n|sự dịu đi, sự bớt căng thẳng
+release|v|thả ra, trả lại tự do
+relevant|adj|thích đáng, thích hợp; xác đáng
+remain|v|duy trì
+remarkable|adj|đáng chú ý, đáng để ý
+remind|v|nhắc lại, nhớ lại
+reminder|n|vật làm nhớ lại, cái làm nhớ lại
+remittance|n|sự gửi tiền, sự gửi hàng
+remove|v|dời đi, di chuyển, dọn, cất dọn
+remuneration|n|thù lao, tiền trả công
+renovate|v|nâng cấp, cải tiến, đổi mới, sửa chữa lại
+renovation|n|sự nâng cấp, sự cải tiến
+rent|n|sự thuê mướn
+repair|v|sửa chữa, sửa đổi
+repayment|n|sự trả lại
+repetitive|adj|có đặc trưng lặp đi lặp lại
+replace|v|thay thế, thay chỗ ai cái gì
+replacement|n|sự thay thế, vật thay thế
+report|n|bản báo cáo, bản tường thuật; biên bản
+represent|v|miêu tả, hình dung
+representative|adj|miêu tả, biểu hiện
+request|n|yêu cầu
+require|v|đòi hỏi, yêu cầu; quy định
+requirement|n|yêu cầu, cần thiết
+reschedule|v|lên lịch, sắp xếp lịch
+rescue|v|cứu ai đó khỏi nguy hiểm
+resemble|v|giống nhau, giống ai đó
+reservation|n|dự phòng
+resign|v|bỏ việc, từ chức
+resist|v|chống lại
+resolve|n, v|quyết tâm, ý kiên quyết
+respect|n|sự kính trọng sự ngưỡng mộ
+respectable|adj|đáng trọng đáng kính
+respond|v|hưởng ứng
+responsibility|n|trách nhiệm, sự chịu trách nhiệm; bổn phận; nghĩa vụ
+responsible|adj|chịu trách nhiệm
+restructure|v|cơ cấu lại, tổ chức lại sắp xếp lại
+resume|v|lấy lại, chiếm lại, giành lại; hồi phục lại
+retail|n, adv|sự bán lẻ, việc bán lẻ
+retire|v|rời bỏ, đi ra, rút về, lui về (một nơi nào kín đáo...)
+retirement|n|sự ẩn dật, sự về hưu
+revamp|v|tân trang, sửa chữa
+revise|v, n|đọc lại, xem lại, duyệt lại, xét lại
+revised|v, n|đọc lại, xem lại, duyệt lại, xét lại
+right|n|điều tốt, điều phải, điều đứng đắn
+rival|n, adj|đối thủ, địch thủ, đối địch, kình địch
+roadside|n, adj|bờ đường, lề đường
+roughly|adv|ráp, xù xì, gồ ghề, không bằng phẳng
+route|n|tuyến đường, lộ trình; đường đi
+runway|n|đường băng
+salary|n|tiền lương
+sale|n|sự bán, việc bán
+salvage|n|sự cứu hộ, sự cứu chạy (khỏi đám cháy, mưa lũ..)
+sample|n|mẫu; vật mẫu, hàng mẫu
+satisfactory|adj|vừa lòng, vừa ý thoả mãn (tuy không xuất sắc lắm)
+satisfied|adj|cảm thấy hài lòng, cảm thấy vừa ý; thoả mãn
+satisfy|v|làm thoả mãn, làm hài lòng
+save|n|cứu nguy, cứu vãn
+savvy|n|sự hiểu biết, nắm rõ
+scene|n|quang cảnh
+scenery|n|phong cảnh, cảnh vật
+schedule|n|kế hoạch làm việc, tiến độ thi công
+scrutinize|v|chăm chú, nhìn kỹ; xem xét kỹ lưỡng
+search|n, v|sự nhìn để tìm, nhìn để tìm, thăm dò
+secluded|adj|hẻo lánh; không có nhiều người trông thấy
+secretarial|adj|thuộc thư ký
+secretary|n|thư ký
+select|v|lựa chọn, chọn lọc, tuyển chọn
+selection|n|sự lựa chọn, sự chọn lọc, sự tuyển lựa
+selective|adj|có tuyển chọn; dựa trên sự tuyển chọn
+seminar|n|hội nghị chuyên đề
+senior|adj|nhiều tuổi hơn; cao hơn về cấp bậc (chức quyền..); lâu năm hơn
+sequel|n|sự tiếp tục, nối tiếp, kết quả
+serious|adj|đứng đắn, nghiêm trang, nghiêm nghị
+service|n|sự phục vụ, sự hầu hạ
+several|adj|vài, riêng, cá nhân; khác nhau
+shape|n|hình, hình dạng, hình thù
+sharp|adj|sắc, nhọn, bén
+shift|n|sự thay đổi (về vị trí, bản chất, hình dáng..)
+shine|n|ánh sáng; ánh nắng; sự chói sáng, độ sáng
+shipment|n|việc gửi hàng, việc chất hàng lên tàu
+shipping|n|đang chuyển hàng
+shortage|n|sự thiếu sót
+shuttle|n|xe đưa đón
+sightseeing|n|tham quan
+significant|adj|quan trọng
+simplify|v|đơn giản hóa
+situation|n|tình hình
+slump|v|sự sụt giảm
+software|n|phần mềm
+solar|adj|hệ mặt trời
+spacious|adj|rộng rãi
+spare part|n|phụ tùng
+spare time|n|thời gian rảnh
+specialize|v|chuyên môn hóa
+specialty|n|chuyên môn
+specification|n|chi tiết, đặc điểm
+specify|v|giải thích, miêu tả
+spectator|n|khán giả
+stable|adj|ổn định
+stadium|n|sân vận động
+staff|n|nhân viên
+stapler|n|người phân loại
+stare|v|nhìn chằm chằm
+starter|n|người ra lệnh xuất phát, món khai vị
+stationery|n|đồ dùng văn phòng
+steep|adj|quá quắt, không biết điều
+stock|n|kho hàng, kho dự trữ
+strategic|adj|mang tính chiến lược
+strategy|v|chiến lược
+streamline|v|dòng nước, luồng không khí
+strike|v|đánh đập
+studio|n|phòng thu âm
+stunning|adj|tuyệt vời, lộng lẫy
+submit|v|xác nhận, gửi đi
+subscribe|v|đăng ký
+subscription|n|sự đăng ký
+subsidiary|adj|sự lệ thuộc
+suffocate|v|làm ngạt, bóp nghẹt
+suggest|v|đề xuất
+suggestion|n|sự đề xuất
+suit|n|bộ vest
+suitability|n|sự thích hợp
+suitable|adj|phù hợp, thích hợp
+supervise|v|giám sát
+supervision|n|sự giám sát
+supplier|n|nhà cung cấp
+supply|v|cung cấp
+support|v|trợ giúp
+supporter|n|người trợ giúp
+surrounding|adj|bao quanh
+suspicious|adj|khả nghi
+switchboard|n|tổng đài
+systematic|adj|có hệ thống
+takeover|n|tiếp quản
+tax|n|thuế
+technical|adj|có tính kỹ thuật
+technician|n|kỹ thuật viên
+temporary|adj|tạm thời
+tenant|n|người thuê nhà
+terminate|v|chấm dứt
+terrible|adj|kinh khủng
+terrific|adj|khủng khiếp
+theoretical|adj|mang tính lý thuyết
+theory|n|học thuyết
+thorough|adj|triệt để
+tidy|adj|ngăn nắp
+tip|n|tiền boa
+tour|n|chuyến du lịch
+tourism|n|du lịch
+tourist|n|du khách
+towel|n|cái khăn lau
+tower|n|tòa nhà, tháp
+track|n|con đường
+trade|n|sự trao đổi (hàng hóa, vật phẩm)
+tradition|n|sự truyền thống
+traffic|n|giao thông
+training|n|sự huấn luyện, sự đào tạo
+transfer|v|chuyển khoản
+transform|v|biến đổi
+transformation|n|sự biến đổi
+transit|n|vận chuyển
+transportation|n|sự vận chuyển
+trend|n|xu hướng
+trial|n|thử nghiệm
+triumph|n|chiến thắng
+trust|v|tin, tin tưởng
+turnover|n|doanh số, doanh thu
+unconditional|adj|vô điều kiện
+understand|v|hiểu, nắm bắt được
+unfavorable|adj|không thuận lợi
+unfortunately|adj|không may mắn
+uniform|n|đồng phục
+unspoiled|adj|hoang sơ
+unwrap|v|bóc, mở
+upcoming|adj|sắp xảy ra
+update|v|nâng cấp
+upgrade|v|nâng cấp
+upset|v, adj|buồn bã, lo lắng
+upstairs|n|tầng trên
+utility bill|n|hóa đơn điện nước
+vacancy|n|vị trí bỏ trống
+vacant|v|bỏ trống
+vacation|n|kì nghỉ
+vaccination|n|tiêm chủng
+valuables|n|vật có giá trị
+varied|adj|đa dạng
+variety|n|sự đa dạng
+various|adj|đa dạng
+vendor|n|người bán
+venture|n|liên doanh
+venue|n|địa điểm
+virus|n|virus
+vital|adj|thiết yếu
+vivid|adj|chói sáng, rực rỡ, sống động
+wage|n|tiền công
+walkway|n|lối đi
+warehouse|n|kho hàng
+warn|v|cảnh báo
+warning|n|sự cảnh báo
+warrant|v|bảo đảm
+warranty|n|sự bảo đảm
+wastage|adj|lãng phí
+waterproof|adj|chống nước
+wealth|adj|giàu có
+website|n|trang web
+weight|n|cân nặng
+welfare|n|phúc lợi
+wholesale|v|bán sỉ, bán buôn
+win|v|thắng, chiến thắng
+withdraw|v|rút
+withdrawal|n|sự rút ra (tiền)
+workplace|n|nơi làm việc
+workshop|n|hội thảo
+worth|adj|giá trị
+worthless|adj|không có giá trị, vô giá trị
+wrap|v|gói, bọc lại
+write|v|viết, sáng tác
+yearly|adv|hằng năm
+yield|v|sản xuất, cung cấp
+youth|n|tuổi trẻ, thời thanh xuân
+zero|n|số 0
+zone|n|vùng, khu vực`;
 
-        // --- Data State ---
-        const DEFAULT_VOCAB = [
-            { word: "accommodate", meaning: "cung cấp chỗ ở, đáp ứng" },
-            { word: "arrangement", meaning: "sự sắp xếp, thỏa thuận" },
-            { word: "association", meaning: "hiệp hội, sự liên kết" },
-            { word: "attend", meaning: "tham dự, có mặt" },
-            { word: "get in touch", meaning: "liên lạc, giữ liên lạc" },
-            { word: "hold", meaning: "cầm, nắm, tổ chức (sự kiện)" },
-            { word: "location", meaning: "địa điểm, vị trí" },
-            { word: "overcrowded", meaning: "chật ních, quá đông đúc" },
-            { word: "register", meaning: "đăng ký, ghi danh" },
-            { word: "select", meaning: "chọn lựa, tuyển chọn" },
-            { word: "session", meaning: "phiên họp, buổi họp" },
-            { word: "take part in", meaning: "tham gia vào (= participate in)" },
-            { word: "access", meaning: "truy cập, đường vào" },
-            { word: "allocate", meaning: "phân bổ, cấp phát" },
-            { word: "compatible", meaning: "tương thích, hợp nhau" },
-            { word: "delete", meaning: "xóa bỏ" },
-            { word: "display", meaning: "hiển thị, trưng bày" },
-            { word: "duplicate", meaning: "sao chép, bản sao" },
-            { word: "failure", meaning: "sự thất bại, sự hỏng hóc" },
-            { word: "ignore", meaning: "phớt lờ, bỏ qua" }
-        ];
-
-        // Global App Data (Loaded from LocalStorage)
-        let appData = JSON.parse(localStorage.getItem('toeic_app_data')) || {
-            customLessons: [] // Array of { id, title, words: [] }
-        };
+        // Global App Data
+        let currentLessonId = 0; 
+        let vocabList = [];
+        let currentMode = 'flashcard'; 
         
-        let currentLessonId = 'default'; // 'default' or index
-        let vocabList = [...DEFAULT_VOCAB];
-        let currentMode = 'flashcard'; // 'flashcard' or 'quiz'
-        
-        // Flashcard State
         let fcIndex = 0;
         let isFlipped = false;
         
-        // Quiz State
         let quizQuestions = [];
         let quizIndex = 0;
         let score = 0;
 
         // --- Initialization ---
         window.onload = () => {
-            // Restore last active lesson if custom data exists
-            if (appData.customLessons.length > 0) {
-                changeLesson(0); 
-            } else {
-                initUI();
-            }
-            renderLessonList();
+            initializeApp();
         };
 
-        function initUI() {
-            document.getElementById('total-words').textContent = vocabList.length;
-            
-            // Set Title
-            if (currentLessonId === 'default') {
-                document.getElementById('current-lesson-title').innerHTML = '<i class="fa-solid fa-star text-yellow-400 mr-1"></i> Từ vựng mặc định';
-            } else {
-                document.getElementById('current-lesson-title').innerHTML = `<i class="fa-solid fa-file-pdf text-red-500 mr-1"></i> ${appData.customLessons[currentLessonId].title}`;
+        function initializeApp() {
+            // Version 6 để làm mới lại dữ liệu vì đã thêm phần từ loại
+            let appData = JSON.parse(localStorage.getItem('toeic_app_data_v6'));
+
+            if (!appData || !appData.lessons) {
+                // Tách dữ liệu mới với format: word|pos|meaning
+                const lines = PRELOADED_DATA.split('\n').filter(l => l.trim() !== '');
+                let allWords = lines.map(line => {
+                    const parts = line.split('|');
+                    return { 
+                        word: parts[0].trim(), 
+                        pos: parts.length > 2 ? parts[1].trim() : '',
+                        meaning: parts.length > 2 ? parts[2].trim() : parts[1].trim() 
+                    };
+                });
+
+                // Xáo trộn ngẫu nhiên toàn bộ 1000 từ
+                allWords = allWords.sort(() => Math.random() - 0.5);
+
+                // Chia đều thành các bài (mỗi bài 30 từ)
+                const chunkSize = 30;
+                const lessons = [];
+                for (let i = 0; i < allWords.length; i += chunkSize) {
+                    lessons.push({
+                        id: i / chunkSize,
+                        title: `Bài học ${Math.floor(i / chunkSize) + 1}`,
+                        words: allWords.slice(i, i + chunkSize)
+                    });
+                }
+
+                appData = { lessons: lessons, allWords: allWords };
+                localStorage.setItem('toeic_app_data_v6', JSON.stringify(appData));
+                showToast(`Đã nạp thành công 1000 từ và xáo trộn ngẫu nhiên chia thành ${lessons.length} bài học!`, "success");
             }
+
+            window.appData = appData;
+            window.allWordsPool = appData.allWords || appData.lessons.flatMap(l => l.words);
             
-            if (currentMode === 'flashcard') {
-                document.getElementById('btn-mode-flashcard').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 shadow-sm";
-                document.getElementById('btn-mode-quiz').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors text-white hover:bg-white/20";
-                
-                document.getElementById('flashcard-view').classList.remove('hidden');
-                document.getElementById('quiz-view').classList.add('hidden');
-                document.getElementById('quiz-score-display').classList.add('hidden');
-                
-                fcIndex = 0;
-                renderFlashcard();
-            } else {
-                document.getElementById('btn-mode-quiz').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 shadow-sm";
-                document.getElementById('btn-mode-flashcard').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors text-white hover:bg-white/20";
-                
-                document.getElementById('quiz-view').classList.remove('hidden');
-                document.getElementById('flashcard-view').classList.add('hidden');
-                document.getElementById('quiz-score-display').classList.remove('hidden');
-                
-                generateQuiz();
-            }
+            renderLessonList();
+            changeLesson(0);
         }
 
         // --- Sidebar & Lesson Management ---
@@ -352,37 +1321,23 @@
             const listContainer = document.getElementById('lesson-list');
             listContainer.innerHTML = '';
 
-            // Default Lesson
-            const defaultBtn = document.createElement('button');
-            defaultBtn.className = `w-full text-left px-4 py-3 rounded-xl mb-2 flex items-center justify-between transition-colors ${currentLessonId === 'default' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200' : 'hover:bg-slate-50 text-slate-600 border border-transparent'}`;
-            defaultBtn.innerHTML = `<span><i class="fa-solid fa-star text-yellow-400 mr-2"></i> Mặc định</span> <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full">${DEFAULT_VOCAB.length} từ</span>`;
-            defaultBtn.onclick = () => { changeLesson('default'); toggleSidebar(); };
-            listContainer.appendChild(defaultBtn);
+            const divider = document.createElement('div');
+            divider.className = "text-xs font-bold text-slate-400 uppercase mt-2 mb-2 px-2";
+            divider.textContent = "Lộ trình 1000 từ vựng";
+            listContainer.appendChild(divider);
 
-            // Custom Lessons
-            if (appData.customLessons.length > 0) {
-                const divider = document.createElement('div');
-                divider.className = "text-xs font-bold text-slate-400 uppercase mt-4 mb-2 px-2";
-                divider.textContent = "Dữ liệu PDF của bạn";
-                listContainer.appendChild(divider);
-
-                appData.customLessons.forEach((lesson, index) => {
-                    const btn = document.createElement('button');
-                    btn.className = `w-full text-left px-4 py-3 rounded-xl mb-2 flex items-center justify-between transition-colors ${currentLessonId === index ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200' : 'hover:bg-slate-50 text-slate-600 border border-transparent'}`;
-                    btn.innerHTML = `<span><i class="fa-solid fa-bookmark text-blue-400 mr-2"></i> ${lesson.title}</span> <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">${lesson.words.length} từ</span>`;
-                    btn.onclick = () => { changeLesson(index); toggleSidebar(); };
-                    listContainer.appendChild(btn);
-                });
-            }
+            window.appData.lessons.forEach((lesson, index) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left px-4 py-3 rounded-xl mb-2 flex items-center justify-between transition-colors ${currentLessonId === index ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200' : 'hover:bg-slate-50 text-slate-600 border border-transparent'}`;
+                btn.innerHTML = `<span><i class="fa-solid fa-bookmark text-blue-400 mr-2"></i> ${lesson.title}</span> <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">${lesson.words.length} từ</span>`;
+                btn.onclick = () => { changeLesson(index); toggleSidebar(); };
+                listContainer.appendChild(btn);
+            });
         }
 
         function changeLesson(id) {
             currentLessonId = id;
-            if (id === 'default') {
-                vocabList = [...DEFAULT_VOCAB];
-            } else {
-                vocabList = [...appData.customLessons[id].words];
-            }
+            vocabList = [...window.appData.lessons[id].words];
             
             // Reset states
             fcIndex = 0;
@@ -391,7 +1346,31 @@
             
             renderLessonList();
             initUI();
-            showToast("Đã chuyển bài học", "success");
+        }
+
+        function initUI() {
+            document.getElementById('total-words').textContent = vocabList.length;
+            document.getElementById('current-lesson-title').innerHTML = `<i class="fa-solid fa-file-pdf text-red-500 mr-1"></i> ${window.appData.lessons[currentLessonId].title}`;
+            
+            if (currentMode === 'flashcard') {
+                document.getElementById('btn-mode-flashcard').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 shadow-sm";
+                document.getElementById('btn-mode-quiz').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors text-white hover:bg-white/20";
+                
+                document.getElementById('flashcard-view').classList.remove('hidden');
+                document.getElementById('quiz-view').classList.add('hidden');
+                document.getElementById('quiz-score-display').classList.add('hidden');
+                
+                renderFlashcard();
+            } else {
+                document.getElementById('btn-mode-quiz').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 shadow-sm";
+                document.getElementById('btn-mode-flashcard').className = "px-4 py-1.5 rounded-md text-sm font-medium transition-colors text-white hover:bg-white/20";
+                
+                document.getElementById('quiz-view').classList.remove('hidden');
+                document.getElementById('flashcard-view').classList.add('hidden');
+                document.getElementById('quiz-score-display').classList.remove('hidden');
+                
+                generateQuiz();
+            }
         }
 
         function switchMode(mode) {
@@ -408,9 +1387,18 @@
             card.classList.remove('flipped');
             isFlipped = false;
             
-            // Give slight delay for flip animation to reset before changing text
             setTimeout(() => {
                 document.getElementById('fc-word').textContent = wordObj.word;
+                
+                // Hiển thị từ loại
+                const posEl = document.getElementById('fc-pos');
+                if (wordObj.pos) {
+                    posEl.textContent = `(${wordObj.pos})`;
+                    posEl.classList.remove('hidden');
+                } else {
+                    posEl.classList.add('hidden');
+                }
+
                 document.getElementById('fc-meaning').textContent = wordObj.meaning;
                 document.getElementById('flashcard-progress').textContent = `${fcIndex + 1} / ${vocabList.length}`;
                 closeAIBox();
@@ -439,38 +1427,31 @@
             }
         }
 
-        function shuffleCards() {
-            vocabList = vocabList.sort(() => Math.random() - 0.5);
-            fcIndex = 0;
-            renderFlashcard();
-            showToast("Đã xáo trộn bộ từ vựng", "success");
-        }
-
         // --- Quiz Logic ---
         function generateQuiz() {
             score = 0;
             quizIndex = 0;
             document.getElementById('current-score').textContent = score;
             
-            // Create a shuffled copy of vocab
-            let shuffledVocab = [...vocabList].sort(() => Math.random() - 0.5);
+            // Xáo trộn thứ tự các từ trong bài học chỉ dùng để hỏi (không ảnh hưởng dữ liệu gốc)
+            let lessonVocab = [...vocabList].sort(() => Math.random() - 0.5);
             quizQuestions = [];
 
-            shuffledVocab.forEach(targetWord => {
-                // Get 3 random wrong answers
-                let wrongOptions = vocabList
-                    .filter(w => w.word !== targetWord.word)
+            lessonVocab.forEach(targetWord => {
+                // Lấy 3 đáp án sai ngẫu nhiên từ kho 1000 từ để tăng độ khó
+                let wrongOptions = window.allWordsPool
+                    .filter(w => w.word !== targetWord.word && w.meaning !== targetWord.meaning)
                     .sort(() => Math.random() - 0.5)
                     .slice(0, 3)
                     .map(w => w.meaning);
                 
-                // If not enough vocab for 4 options, duplicate some (edge case)
                 while(wrongOptions.length < 3) wrongOptions.push("Nghĩa khác " + Math.random().toString(36).substring(7));
 
                 let options = [...wrongOptions, targetWord.meaning].sort(() => Math.random() - 0.5);
                 
                 quizQuestions.push({
                     word: targetWord.word,
+                    pos: targetWord.pos,
                     correct: targetWord.meaning,
                     options: options
                 });
@@ -482,8 +1463,9 @@
         function renderQuizQuestion() {
             if (quizIndex >= quizQuestions.length) {
                 document.getElementById('quiz-word').innerHTML = `<span class="text-blue-600">Hoàn thành!</span>`;
+                document.getElementById('quiz-pos').classList.add('hidden');
                 document.getElementById('quiz-options').innerHTML = `<p class="col-span-1 sm:col-span-2 text-xl font-bold">Điểm của bạn: ${score}/${quizQuestions.length}</p>
-                <button onclick="generateQuiz()" class="mt-4 col-span-1 sm:col-span-2 py-3 bg-indigo-50 text-indigo-700 font-semibold rounded-xl hover:bg-indigo-100">Làm lại</button>`;
+                <button onclick="generateQuiz()" class="mt-4 col-span-1 sm:col-span-2 py-3 bg-indigo-50 text-indigo-700 font-semibold rounded-xl hover:bg-indigo-100">Làm lại bài này</button>`;
                 document.getElementById('btn-next-quiz').classList.add('hidden');
                 document.getElementById('quiz-progress').textContent = "Kết quả";
                 return;
@@ -491,6 +1473,16 @@
 
             const q = quizQuestions[quizIndex];
             document.getElementById('quiz-word').textContent = q.word;
+            
+            // Hiển thị từ loại trong quiz
+            const posEl = document.getElementById('quiz-pos');
+            if (q.pos) {
+                posEl.textContent = `(${q.pos})`;
+                posEl.classList.remove('hidden');
+            } else {
+                posEl.classList.add('hidden');
+            }
+
             document.getElementById('quiz-progress').textContent = `Câu hỏi ${quizIndex + 1} / ${quizQuestions.length}`;
             document.getElementById('btn-next-quiz').classList.add('hidden');
 
@@ -507,13 +1499,12 @@
         }
 
         function handleQuizAnswer(btn, selectedOption, correctOption) {
-            // Disable all buttons
             const allBtns = document.querySelectorAll('.option-btn');
             allBtns.forEach(b => {
                 b.onclick = null;
                 b.classList.remove('hover:border-blue-400', 'hover:bg-blue-50', 'cursor-pointer');
                 
-                // Highlight correct answer anyway
+                // Luôn hiển thị đáp án đúng màu xanh
                 if (b.textContent === correctOption) {
                     b.classList.add('border-green-500', 'bg-green-50', 'text-green-800');
                     b.innerHTML += ' <i class="fa-solid fa-check-circle float-right mt-1 text-green-500"></i>';
@@ -540,7 +1531,7 @@
 
         // --- Audio TTS ---
         function playAudio(event) {
-            if(event) event.stopPropagation(); // prevent card flip
+            if(event) event.stopPropagation();
             const word = vocabList[fcIndex].word;
             speakText(word);
         }
@@ -552,19 +1543,16 @@
 
         function speakText(text) {
             if ('speechSynthesis' in window) {
-                // Cancel any ongoing speech
                 window.speechSynthesis.cancel();
-                
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-US';
-                utterance.rate = 0.9; // Slightly slower for better pronunciation
+                utterance.rate = 0.9;
                 window.speechSynthesis.speak(utterance);
             } else {
                 showToast("Trình duyệt không hỗ trợ phát âm thanh", "error");
             }
         }
 
-        // Simple beep sounds via Web Audio API (Fallback if no real audio files)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSuccessSound() {
             if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -596,14 +1584,13 @@
             oscillator.stop(audioCtx.currentTime + 0.15);
         }
 
-
         // --- Gemini API Integration ---
         function closeAIBox() {
             document.getElementById('ai-result-box').classList.add('hidden');
         }
 
         async function askAI(event) {
-            event.stopPropagation(); // prevent card flip
+            event.stopPropagation();
 
             const wordObj = vocabList[fcIndex];
             const resultBox = document.getElementById('ai-result-box');
@@ -612,14 +1599,8 @@
             resultBox.classList.remove('hidden');
             contentBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> AI đang phân tích từ "' + wordObj.word + '"...';
 
-            // Construct Prompt
-            const prompt = `Bạn là một chuyên gia luyện thi TOEIC. Hãy giải thích ngắn gọn, súc tích từ vựng tiếng Anh: "${wordObj.word}" (nghĩa: ${wordObj.meaning}). 
-Yêu cầu trả về theo định dạng văn bản bình thường (không dùng markdown in đậm quá nhiều), gồm 3 ý chính:
-1. Giải thích sắc thái nghĩa trong TOEIC.
-2. 1 Câu ví dụ tiếng Anh (kèm dịch tiếng Việt).
-3. Các từ đồng nghĩa thường gặp (Synonyms).`;
+            const prompt = `Bạn là chuyên gia TOEIC. Giải thích ngắn gọn: "${wordObj.word}" (loại từ: ${wordObj.pos || 'không rõ'}, nghĩa: ${wordObj.meaning}). Gồm: 1. Sắc thái nghĩa. 2. Ví dụ TA kèm dịch TV. 3. Đồng nghĩa.`;
 
-            // Môi trường cung cấp API key trong thời gian chạy (chỉ cần để rỗng).
             const apiKey = "";
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             const payload = {
@@ -633,259 +1614,69 @@ Yêu cầu trả về theo định dạng văn bản bình thường (không dù
 
             while (attempt < 6 && !success) {
                 try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
+                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
                     
                     if (data.candidates && data.candidates[0].content.parts[0].text) {
-                        let aiText = data.candidates[0].content.parts[0].text;
-                        // Basic formatting text to HTML
-                        aiText = aiText.replace(/\n/g, '<br>');
-                        contentBox.innerHTML = aiText;
+                        contentBox.innerHTML = data.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
                         success = true;
                     } else {
-                         throw new Error("Không nhận được kết quả hợp lệ từ AI.");
+                         throw new Error("Không nhận được kết quả hợp lệ.");
                     }
-
                 } catch (error) {
-                    if (attempt < 5) {
-                        // Exponential backoff
-                        await new Promise(resolve => setTimeout(resolve, delays[attempt]));
-                    } else {
-                        // Log errors internally rather than exposing raw HTTP to users
-                        console.error("Lỗi khi kết nối AI API:", error);
-                        contentBox.innerHTML = `<span class="text-red-500"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi hệ thống: Không thể kết nối với AI (${error.message}). Vui lòng thử lại sau.</span>`;
-                    }
+                    if (attempt < 5) await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+                    else contentBox.innerHTML = `<span class="text-red-500"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi: Không thể kết nối với AI (${error.message}).</span>`;
                     attempt++;
                 }
             }
         }
 
+        // --- Data Sync/Backup & Reshuffle Functions ---
+        function reshuffleAll() {
+            if(confirm("Bạn có chắc chắn muốn tạo lại dữ liệu? 1000 từ sẽ được xáo trộn lại hoàn toàn vào các bài học mới. Tiến độ học của các bài hiện tại sẽ bị xóa!")) {
+                localStorage.removeItem('toeic_app_data_v6');
+                initializeApp();
+                toggleSettingsModal();
+            }
+        }
 
-        // --- PDF Processing ---
-        async function handlePDFUpload(event) {
+        function exportData() {
+            if (!window.appData) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.appData));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "toeic_1000_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            showToast("Đã xuất file dữ liệu tiến trình học thành công!", "success");
+        }
+
+        function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
-            if (file.type !== "application/pdf") {
-                showToast("Vui lòng chọn file PDF hợp lệ", "error");
-                return;
-            }
-
-            document.getElementById('pdf-loading').classList.remove('hidden');
-
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-                let fullText = "";
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageStrings = textContent.items.map(item => item.str);
-                    fullText += pageStrings.join(" ") + "\n";
-                }
-
-                parseVocabText(fullText);
-                
-            } catch (error) {
-                console.error("PDF Parsing Error:", error);
-                showToast("Lỗi khi đọc file PDF", "error");
-            } finally {
-                document.getElementById('pdf-loading').classList.add('hidden');
-                event.target.value = ""; // Reset input
-            }
-        }
-
-        function parseVocabText(text) {
-            let newVocab = [];
-            let combinedText = text.replace(/\s+/g, ' ');
-
-            // 1. Chiến thuật quét neo STT (Chính xác 100% cho file TOEIC 1000 từ)
-            let sttRegex = /(?:^|\s)(\d{1,4})\s+(?=[a-zA-Z])/g;
-            let matches = [...combinedText.matchAll(sttRegex)];
-            
-            let validMatches = [];
-            let expectedNum = -1;
-            
-            for (let m of matches) {
-                let num = parseInt(m[1]);
-                if (expectedNum === -1) {
-                    if (num === 1 || num === 2 || num === 3) {
-                        validMatches.push(m);
-                        expectedNum = num;
-                    }
-                } else {
-                    // Cho phép nhảy cóc tối đa 15 số để đề phòng PDF gõ nhầm số STT
-                    if (num > expectedNum && num <= expectedNum + 15) {
-                        validMatches.push(m);
-                        expectedNum = num;
-                    }
-                }
-            }
-
-            if (validMatches.length > 50) {
-                const posStr = "n|v|adj|adv|prep|conj|pron|det";
-                // Regex tìm ranh giới tách biệt giữa "Từ tiếng Anh" và phần đuôi (Loại từ/Phiên âm/Nghĩa)
-                const boundaryRegex = new RegExp(`\\s+(?:(?:${posStr})(?:[\\s,]+(?:${posStr})){0,3}(?=\\s|[\\/']|$)|[\\/\\[]|[əæɔʌʃʒθðŋdʒtʃː])`, 'i');
-                const posCleanRegex = new RegExp(`^\\s*(?:${posStr})(?:[\\s,]+(?:${posStr})){0,3}\\s*`, 'i');
-
-                for (let i = 0; i < validMatches.length; i++) {
-                    let current = validMatches[i];
-                    let nextIndex = (i + 1 < validMatches.length) ? validMatches[i+1].index : combinedText.length;
-                    
-                    let rowText = combinedText.substring(current.index + current[0].length, nextIndex).trim();
-                    let bMatch = rowText.match(boundaryRegex);
-                    
-                    let word = "";
-                    let tail = "";
-                    
-                    if (bMatch) {
-                        word = rowText.substring(0, bMatch.index).trim();
-                        tail = rowText.substring(bMatch.index).trim();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData && importedData.lessons) {
+                        window.appData = importedData;
+                        window.allWordsPool = importedData.allWords || importedData.lessons.flatMap(l => l.words);
+                        localStorage.setItem('toeic_app_data_v6', JSON.stringify(window.appData));
+                        showToast("Đã khôi phục dữ liệu học thành công!", "success");
+                        renderLessonList();
+                        changeLesson(0);
+                        toggleSettingsModal();
                     } else {
-                        // Nếu file PDF bị mất sạch Loại Từ và Phiên Âm, tách chữ tiếng Anh đầu tiên
-                        let tokens = rowText.split(' ');
-                        word = tokens[0];
-                        tail = tokens.slice(1).join(' ');
+                        showToast("File backup sai định dạng!", "error");
                     }
-                    
-                    let cleanMeaning = tail;
-                    
-                    // Dọn dẹp Loại từ, Phiên âm, Rác tiếng Anh
-                    cleanMeaning = cleanMeaning.replace(posCleanRegex, '');
-                    cleanMeaning = cleanMeaning.replace(/\/[^\/]+\//g, '');
-                    cleanMeaning = cleanMeaning.replace(/\[[^\]]+\]/g, '');
-                    cleanMeaning = cleanMeaning.replace(/^[a-zA-Zəæɔʌʃʒθðŋdʒtʃː:.\-ˈˌ]+\/\s*/, '');
-                    cleanMeaning = cleanMeaning.replace(/^\/[a-zA-Zəæɔʌʃʒθðŋdʒtʃː:.\-ˈˌ]+\s*/, '');
-                    cleanMeaning = cleanMeaning.replace(posCleanRegex, '');
-                    
-                    let tokens = cleanMeaning.split(' ');
-                    if (tokens[0] && (/[əæɔʌʃʒθðŋdʒtʃː]/.test(tokens[0]) || tokens[0].includes(':.'))) {
-                        tokens.shift();
-                        cleanMeaning = tokens.join(' ').trim();
-                    }
-                    
-                    const footerIndex = cleanMeaning.indexOf("Giải thích loại từ");
-                    if (footerIndex !== -1) cleanMeaning = cleanMeaning.substring(0, footerIndex);
-                    
-                    cleanMeaning = cleanMeaning.replace(/(?:mochidemy\.com|MochiMochi|\b\d{1,4}\b)+$/gi, '').trim();
-                    cleanMeaning = cleanMeaning.replace(/^(?:mochidemy\.com|MochiMochi|\b\d{1,4}\b)+/gi, '').trim();
-                    cleanMeaning = cleanMeaning.replace(/^[\.,\-\:\|]+\s*/, '').replace(/\s*[\.,\-\:\|]+$/, '');
-                    
-                    let cleanWord = word.replace(/^[\.,\-\:\|]+\s*/, '').replace(/\s*[\.,\-\:\|]+$/, '').trim();
-                    
-                    if (cleanWord.length > 0 && cleanMeaning.length > 0 && !cleanWord.toLowerCase().includes("từ vựng")) {
-                        newVocab.push({ word: cleanWord, meaning: cleanMeaning });
-                    }
+                } catch (err) {
+                    showToast("Lỗi khi đọc file!", "error");
                 }
-            } 
-            
-            // 2. Fallback cho các file PDF không có đánh số STT
-            if (newVocab.length < 50) {
-                newVocab = [];
-                const parts = combinedText.split(/(\/[^\/]{2,50}\/)/);
-                if (parts.length > 2) {
-                    const posStr = "n|v|adj|adv|prep|conj|pron|det";
-                    const extractWordRegex = new RegExp(`(?:\\s+|^)(?:(\\d{1,4})\\s+)?([a-zA-Z][\\w\\-\\s\\(\\)'\\’]{1,35}?)(?:\\s+(?:${posStr})(?:[\\s,]+(?:${posStr})){0,3})?\\s*$`, 'i');
-
-                    for (let i = 1; i < parts.length; i += 2) {
-                        let beforeStr = parts[i-1];
-                        let m = extractWordRegex.exec(beforeStr);
-                        
-                        let word = "";
-                        let meaningForPrev = "";
-                        
-                        if (m) {
-                            word = m[2].trim();
-                            meaningForPrev = beforeStr.substring(0, m.index).trim();
-                        } else {
-                            let tokens = beforeStr.trim().split(/\s+/);
-                            if (new RegExp(`^(?:${posStr})$`, 'i').test(tokens[tokens.length - 1])) {
-                                tokens.pop();
-                            }
-                            word = tokens.pop() || "";
-                            meaningForPrev = tokens.join(" ");
-                        }
-                        
-                        newVocab.push({ word: word, meaning: "" });
-                        if (newVocab.length > 1) {
-                            newVocab[newVocab.length - 2].meaning = meaningForPrev;
-                        }
-                    }
-                    
-                    if (newVocab.length > 0 && parts.length % 2 === 1) {
-                        newVocab[newVocab.length - 1].meaning = parts[parts.length - 1].trim();
-                    }
-                    
-                    newVocab = newVocab.map(v => {
-                        let cMeaning = v.meaning.replace(/(?:mochidemy\.com|MochiMochi|\b\d{1,4}\b)+$/gi, '').trim();
-                        cMeaning = cMeaning.replace(/^[\.,\-\:\|]+\s*/, '').replace(/\s*[\.,\-\:\|]+$/, '');
-                        return { word: v.word, meaning: cMeaning };
-                    }).filter(v => v.word.length > 0 && v.meaning.length > 0 && !v.word.toLowerCase().includes("từ vựng"));
-                }
-            }
-
-            // Fallback định dạng dấu "-" hoặc ":"
-            if (newVocab.length < 50) {
-                newVocab = [];
-                const lines = text.split('\n');
-                const regex = /([a-zA-Z\s\(\)\-]+)(?:\([a-z]+\))?\s*[-:]\s*(.+)/;
-
-                lines.forEach(line => {
-                    const match = line.match(regex);
-                    if (match && match[1] && match[2]) {
-                        let word = match[1].trim().replace(/^\d+[\.\)]\s*/, '');
-                        let meaning = match[2].trim();
-                        if (word.length > 0 && word.length < 30 && meaning.length > 0) newVocab.push({ word, meaning });
-                    }
-                });
-            }
-
-            if (newVocab.length > 0) {
-                // Giới hạn 2000 từ để tránh giật lag trình duyệt
-                if(newVocab.length > 2000) {
-                    newVocab = newVocab.slice(0, 2000);
-                }
-
-                // CHIA BÀI HỌC (30 từ mỗi bài)
-                const chunkSize = 30;
-                let chunks = [];
-                for (let i = 0; i < newVocab.length; i += chunkSize) {
-                    chunks.push(newVocab.slice(i, i + chunkSize));
-                }
-
-                // Lưu vào LocalStorage
-                appData.customLessons = chunks.map((chunk, index) => ({
-                    id: index,
-                    title: `Bài học ${index + 1}`,
-                    words: chunk
-                }));
-                localStorage.setItem('toeic_app_data', JSON.stringify(appData));
-
-                showToast(`Đã bóc tách xuất sắc ${newVocab.length} từ vựng và chia thành ${appData.customLessons.length} bài học!`, "success");
-                toggleSettingsModal();
-                renderLessonList();
-                changeLesson(0); // Tự động load bài 1
-            } else {
-                showToast("Không tìm thấy định dạng Từ vựng phù hợp trong PDF.", "error");
-            }
-        }
-
-        function resetToDefaultData() {
-            appData.customLessons = [];
-            localStorage.removeItem('toeic_app_data');
-            
-            showToast("Đã xóa dữ liệu PDF, khôi phục mặc định", "info");
-            toggleSettingsModal();
-            changeLesson('default');
+            };
+            reader.readAsText(file);
+            event.target.value = "";
         }
 
         // --- UI Utilities ---
@@ -894,19 +1685,14 @@ Yêu cầu trả về theo định dạng văn bản bình thường (không dù
             const modalInner = modal.querySelector('div');
             
             if (modal.classList.contains('hidden')) {
-                // Open
                 modal.classList.remove('hidden');
-                // Trigger reflow
                 void modal.offsetWidth;
                 modal.classList.remove('opacity-0');
                 modalInner.classList.remove('scale-95');
             } else {
-                // Close
                 modal.classList.add('opacity-0');
                 modalInner.classList.add('scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300); // match duration-300
+                setTimeout(() => modal.classList.add('hidden'), 300);
             }
         }
 
@@ -916,30 +1702,19 @@ Yêu cầu trả về theo định dạng văn bản bình thường (không dù
             
             let bgClass = "bg-slate-800 text-white";
             let icon = '<i class="fa-solid fa-circle-info text-blue-400"></i>';
-            
-            if (type === "success") {
-                icon = '<i class="fa-solid fa-circle-check text-green-400"></i>';
-            } else if (type === "error") {
-                icon = '<i class="fa-solid fa-circle-xmark text-red-400"></i>';
-            }
+            if (type === "success") icon = '<i class="fa-solid fa-circle-check text-green-400"></i>';
+            else if (type === "error") icon = '<i class="fa-solid fa-circle-xmark text-red-400"></i>';
 
             toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-sm font-medium transform transition-all duration-300 translate-y-2 opacity-0 ${bgClass}`;
             toast.innerHTML = `${icon} <span>${message}</span>`;
             
             container.appendChild(toast);
-            
-            // Animate in
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
-            
-            // Remove after 3 seconds
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-x-4');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
-
     </script>
 </body>
 </html>
