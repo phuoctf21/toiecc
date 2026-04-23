@@ -19,7 +19,7 @@
         .rotate-y-180 { transform: rotateY(180deg); }
         
         .flashcard-inner {
-            transition: transfiorm 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
             transform-style: preserve-3d;
         }
         
@@ -32,6 +32,11 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px;}
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-blue-200 selection:text-blue-900">
@@ -211,7 +216,7 @@
 
                 <div>
                     <h4 class="font-bold text-slate-900 text-base mb-1">🔊 Về hệ thống phát âm</h4>
-                    <p>Hệ thống sử dụng cơ chế kéo file âm thanh MP3 chuẩn TOEIC (Giọng Anh-Mỹ) từ máy chủ từ điển trực tuyến. Vì vậy, phát âm sẽ <b>giống hệt nhau trên tất cả các thiết bị</b> (iPhone, Android, Windows, Mac). Nếu mạng yếu, hệ thống sẽ tự động dùng giọng chuẩn có sẵn của máy tính để thay thế.</p>
+                    <p>Hệ thống sử dụng cơ chế kéo file âm thanh MP3 cực chuẩn (Giọng Anh-Mỹ) từ máy chủ Google Translate & Từ điển Youdao. Vì vậy, phát âm sẽ <b>giống hệt nhau trên tất cả các thiết bị</b> (iPhone, Android, Windows, Mac) mà không phụ thuộc vào hệ điều hành.</p>
                 </div>
             </div>
             
@@ -404,7 +409,7 @@ book|n, v|cuốn sách; đặt phòng, đặt vé
 boost|v, n|đẩy mạnh, kích thích; sự tăng lên
 bored|adj|buồn chán, tẻ nhạt
 bother|n, v|điều gây khó chịu; làm phiền, bận tâm
-bottom line|n|điểm mấu chốt, cốt yếu
+bottom line|n|điểm mấu তৃতীয়, cốt yếu
 branch|n|cành cây, chi nhánh
 brand|n|nhãn hàng, thương hiệu
 briefcase|n|cặp tài liệu
@@ -1286,39 +1291,6 @@ zone|n|vùng, khu vực`;
         let quizIndex = 0;
         let score = 0;
 
-        // Khởi tạo giọng đọc từ hệ thống (Fallback)
-        let selectedEnglishVoice = null;
-
-        function setupVoices() {
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length > 0) {
-                const preferredVoiceNames = [
-                    'Google US English', 
-                    'Microsoft Zira',    
-                    'Microsoft David',   
-                    'Samantha',          
-                    'Alex',              
-                    'Fred'               
-                ];
-
-                for (let name of preferredVoiceNames) {
-                    selectedEnglishVoice = voices.find(v => v.name.includes(name));
-                    if (selectedEnglishVoice) break;
-                }
-
-                if (!selectedEnglishVoice) {
-                    selectedEnglishVoice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang.startsWith('en-'));
-                }
-            }
-        }
-
-        if ('speechSynthesis' in window) {
-            setupVoices();
-            if (window.speechSynthesis.onvoiceschanged !== undefined) {
-                window.speechSynthesis.onvoiceschanged = setupVoices;
-            }
-        }
-
         // --- Hàm tạo ngẫu nhiên có hạt giống cố định (Seeded PRNG) ---
         function seededRandom(seed) {
             var m = 0x80000000;
@@ -1350,8 +1322,8 @@ zone|n|vùng, khu vực`;
         };
 
         function initializeApp() {
-            // Version 10: Xóa bỏ API, nâng cấp hệ thống Audio hoàn chỉnh
-            let appData = JSON.parse(localStorage.getItem('toeic_app_data_v10'));
+            // Version 11: Xóa bỏ Gemini API hoàn toàn, Nâng cấp Audio đám mây cố định
+            let appData = JSON.parse(localStorage.getItem('toeic_app_data_v11'));
 
             if (!appData || !appData.lessons) {
                 const lines = PRELOADED_DATA.split('\n').filter(l => l.trim() !== '');
@@ -1377,7 +1349,7 @@ zone|n|vùng, khu vực`;
                 }
 
                 appData = { lessons: lessons, allWords: allWords };
-                localStorage.setItem('toeic_app_data_v10', JSON.stringify(appData));
+                localStorage.setItem('toeic_app_data_v11', JSON.stringify(appData));
                 showToast(`Đã thiết lập cố định 1000 từ vựng và chia thành ${lessons.length} bài học!`, "success");
             }
 
@@ -1512,7 +1484,6 @@ zone|n|vùng, khu vực`;
         }
 
         function shuffleCards() {
-            // Xáo trộn ngẫu nhiên 30 từ của bài học đang mở (không dùng hạt giống để mỗi lần trộn là 1 lần khác nhau)
             vocabList = vocabList.sort(() => Math.random() - 0.5);
             fcIndex = 0;
             renderFlashcard();
@@ -1617,7 +1588,7 @@ zone|n|vùng, khu vực`;
             renderQuizQuestion();
         }
 
-        // --- HỆ THỐNG PHÁT ÂM CỰC CHUẨN (Từ điển Oxford/US) ---
+        // --- HỆ THỐNG PHÁT ÂM CỰC CHUẨN (Cloud API MP3) ---
         function playAudio(event) {
             if(event) event.stopPropagation();
             
@@ -1644,35 +1615,23 @@ zone|n|vùng, khu vực`;
         }
 
         function speakText(text) {
-            // Xử lý chuỗi để truyền vào URL chính xác
             const safeText = encodeURIComponent(text);
             
-            // CÁCH 1: Gọi file âm thanh (.mp3) tiếng Anh Mỹ chuẩn từ máy chủ Google Translate
-            // Lợi ích: Không bị chặn trên Github, giọng cực kì to, rõ ràng và chuẩn xác 100% trên mọi nền tảng.
-            const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en-US&client=tw-ob&q=${safeText}`;
-            const audio = new Audio(audioUrl);
-            audio.volume = 1.0; // Luôn ép âm lượng thiết bị phát ra ở mức tối đa (100%)
+            // Lấy Audio file trực tiếp từ Google API (Không qua Web Speech API nội bộ)
+            // Giúp đồng bộ 100% giọng chuẩn tiếng Anh - Mỹ cực kỳ to rõ trên iOS/Android/Windows
+            const url1 = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=en-US&q=${safeText}`;
+            const url2 = `https://dict.youdao.com/dictvoice?audio=${safeText}&type=2`;
             
+            const audio = new Audio(url1);
+            audio.volume = 1.0; 
+
             audio.play().catch(e => {
-                console.warn("Không thể tải file âm thanh chuẩn, sử dụng giọng máy (Fallback)...");
-                // CÁCH 2: Fallback (Dự phòng) - Dùng giọng máy nếu không có mạng / lỗi kết nối
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    
-                    utterance.lang = 'en-US';
-                    utterance.rate = 0.85; 
-                    utterance.pitch = 1.0; 
-                    utterance.volume = 1.0; // Ép âm lượng phát ra to nhất
-
-                    if (selectedEnglishVoice) {
-                        utterance.voice = selectedEnglishVoice;
-                    }
-
-                    window.speechSynthesis.speak(utterance);
-                } else {
-                    showToast("Thiết bị không hỗ trợ phát âm thanh", "error");
-                }
+                console.warn("Lỗi tải giọng Google, chuyển sang Youdao...");
+                const audio2 = new Audio(url2);
+                audio2.volume = 1.0;
+                audio2.play().catch(err => {
+                    showToast("Lỗi kết nối mạng: Không thể tải file âm thanh", "error");
+                });
             });
         }
 
@@ -1730,7 +1689,7 @@ zone|n|vùng, khu vực`;
                     if (importedData && importedData.lessons) {
                         window.appData = importedData;
                         window.allWordsPool = importedData.allWords || importedData.lessons.flatMap(l => l.words);
-                        localStorage.setItem('toeic_app_data_v10', JSON.stringify(window.appData));
+                        localStorage.setItem('toeic_app_data_v11', JSON.stringify(window.appData));
                         showToast("Đã khôi phục dữ liệu học thành công!", "success");
                         renderLessonList();
                         changeLesson(0);
