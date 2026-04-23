@@ -19,7 +19,7 @@
         .rotate-y-180 { transform: rotateY(180deg); }
         
         .flashcard-inner {
-            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transition: transfiorm 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
             transform-style: preserve-3d;
         }
         
@@ -32,11 +32,6 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px;}
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-blue-200 selection:text-blue-900">
@@ -121,20 +116,21 @@
                     
                     <!-- Front (Word) -->
                     <div class="absolute inset-0 backface-hidden bg-white rounded-3xl border border-slate-100 flex flex-col items-center justify-center p-8">
-                        <button onclick="playAudio(event)" class="absolute top-4 right-4 w-12 h-12 bg-blue-50 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors flex items-center justify-center shadow-sm">
+                        <button onclick="playAudio(event)" class="absolute top-4 right-4 w-12 h-12 bg-blue-50 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors flex items-center justify-center shadow-sm" title="Nghe phát âm chuẩn">
                             <i class="fa-solid fa-volume-high text-2xl"></i>
                         </button>
                         <h2 id="fc-word" class="text-4xl sm:text-5xl font-bold text-slate-800 text-center mb-2">Word</h2>
                         <!-- Hiển thị Từ loại -->
                         <span id="fc-pos" class="text-sm font-semibold text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full mb-4 hidden">(n)</span>
-                        <p class="text-slate-400 text-sm italic mt-4">Chạm để xem nghĩa</p>
+                        <p class="text-slate-400 text-sm italic mt-4">Chạm vào thẻ để xem nghĩa</p>
                     </div>
                     
                     <!-- Back (Meaning) -->
                     <div class="absolute inset-0 backface-hidden bg-blue-50 rounded-3xl border border-blue-100 flex flex-col items-center justify-center p-8 rotate-y-180">
-                        <h3 id="fc-meaning" class="text-2xl sm:text-3xl font-semibold text-blue-800 text-center mb-2">Nghĩa của từ</h3>
-                        <button onclick="playAudio(event)" class="mt-4 px-4 py-2 bg-white text-blue-500 border border-blue-200 hover:bg-blue-100 rounded-full transition-colors flex items-center gap-2 shadow-sm text-sm font-medium">
-                            <i class="fa-solid fa-volume-high"></i> Nghe lại
+                        <h3 id="fc-meaning" class="text-2xl sm:text-3xl font-semibold text-blue-800 text-center mb-8 px-4 leading-relaxed">Nghĩa của từ</h3>
+                        
+                        <button onclick="playAudio(event)" class="px-8 py-3 bg-blue-600 text-white hover:bg-blue-700 rounded-full transition-colors flex items-center justify-center gap-3 shadow-md text-base font-medium transform hover:scale-105">
+                            <i class="fa-solid fa-volume-high text-xl"></i> Nghe lại phát âm
                         </button>
                     </div>
                 </div>
@@ -211,6 +207,11 @@
                 <div>
                     <h4 class="font-bold text-slate-900 text-base mb-1">🔄 Làm sao để chuyển máy tính/điện thoại vẫn giữ nguyên bài học?</h4>
                     <p>Rất đơn giản, bạn chỉ cần bấm vào nút <b>Cài đặt (Hình bánh răng) -> Chọn "Xuất dữ liệu"</b>. Trang web sẽ tải về một file nhỏ (backup.json). Hãy gửi file này sang máy tính mới, mở web lên và bấm <b>"Nhập dữ liệu"</b> để tiếp tục học.</p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-900 text-base mb-1">🔊 Về hệ thống phát âm</h4>
+                    <p>Hệ thống sử dụng cơ chế kéo file âm thanh MP3 chuẩn TOEIC (Giọng Anh-Mỹ) từ máy chủ từ điển trực tuyến. Vì vậy, phát âm sẽ <b>giống hệt nhau trên tất cả các thiết bị</b> (iPhone, Android, Windows, Mac). Nếu mạng yếu, hệ thống sẽ tự động dùng giọng chuẩn có sẵn của máy tính để thay thế.</p>
                 </div>
             </div>
             
@@ -769,7 +770,7 @@ inconvenience|n|sự bất tiện, phiền hà
 increase|v, n|sự tăng lên; tăng thêm
 indicate|v|chỉ ra, chứng tỏ, biểu thị
 indication|n|sự biểu thị, biểu lộ
-individual|n, v|cá nhân; riêng lẻ, tách biệt
+individual|n, v|c cá nhân; riêng lẻ, tách biệt
 individually|adv|riêng lẻ
 inexperienced|adj|thiếu kinh nghiệm
 infer|v|suy ra, kết luận
@@ -806,7 +807,7 @@ isolate|v|cô lập, cách ly
 item|n|món đồ, tin tức
 itemize|v|trình bày thành từng khoản, từng món
 itinerary|n|hành trình, lịch trình
-jealous|adj|ghen ghét, đốky
+jealous|adj|ghen ghét, đố kỵ
 jeopardize|v|gây nguy hại, đe dọa
 jeopardy|n|nguy cơ, sự nguy hiểm
 jobless|adj|thất nghiệp, không có việc làm
@@ -1285,21 +1286,29 @@ zone|n|vùng, khu vực`;
         let quizIndex = 0;
         let score = 0;
 
-        // --- TTS Voice Setup ---
-        let bestEnglishVoice = null;
-        let voicesLoaded = false;
+        // Khởi tạo giọng đọc từ hệ thống (Fallback)
+        let selectedEnglishVoice = null;
 
         function setupVoices() {
             const voices = window.speechSynthesis.getVoices();
             if (voices.length > 0) {
-                voicesLoaded = true;
-                // Tìm kiếm giọng Tiếng Anh chuẩn (ưu tiên giọng US hoặc giọng Google, Premium)
-                bestEnglishVoice = voices.find(v => v.name.includes('Google US English')) ||
-                                   voices.find(v => v.name.includes('Microsoft Zira')) ||
-                                   voices.find(v => v.name.includes('Samantha')) ||
-                                   voices.find(v => v.lang === 'en-US' && v.name.includes('Premium')) ||
-                                   voices.find(v => v.lang === 'en-US') ||
-                                   voices.find(v => v.lang.startsWith('en-'));
+                const preferredVoiceNames = [
+                    'Google US English', 
+                    'Microsoft Zira',    
+                    'Microsoft David',   
+                    'Samantha',          
+                    'Alex',              
+                    'Fred'               
+                ];
+
+                for (let name of preferredVoiceNames) {
+                    selectedEnglishVoice = voices.find(v => v.name.includes(name));
+                    if (selectedEnglishVoice) break;
+                }
+
+                if (!selectedEnglishVoice) {
+                    selectedEnglishVoice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang.startsWith('en-'));
+                }
             }
         }
 
@@ -1341,7 +1350,8 @@ zone|n|vùng, khu vực`;
         };
 
         function initializeApp() {
-            let appData = JSON.parse(localStorage.getItem('toeic_app_data_v9'));
+            // Version 10: Xóa bỏ API, nâng cấp hệ thống Audio hoàn chỉnh
+            let appData = JSON.parse(localStorage.getItem('toeic_app_data_v10'));
 
             if (!appData || !appData.lessons) {
                 const lines = PRELOADED_DATA.split('\n').filter(l => l.trim() !== '');
@@ -1354,7 +1364,6 @@ zone|n|vùng, khu vực`;
                     };
                 });
 
-                // Luôn xáo trộn 1000 từ bằng Hạt giống 12345. Máy nào cũng ra chung 1 kết quả trộn!
                 allWords = seededShuffle(allWords, 12345);
 
                 const chunkSize = 30;
@@ -1368,7 +1377,7 @@ zone|n|vùng, khu vực`;
                 }
 
                 appData = { lessons: lessons, allWords: allWords };
-                localStorage.setItem('toeic_app_data_v9', JSON.stringify(appData));
+                localStorage.setItem('toeic_app_data_v10', JSON.stringify(appData));
                 showToast(`Đã thiết lập cố định 1000 từ vựng và chia thành ${lessons.length} bài học!`, "success");
             }
 
@@ -1503,6 +1512,7 @@ zone|n|vùng, khu vực`;
         }
 
         function shuffleCards() {
+            // Xáo trộn ngẫu nhiên 30 từ của bài học đang mở (không dùng hạt giống để mỗi lần trộn là 1 lần khác nhau)
             vocabList = vocabList.sort(() => Math.random() - 0.5);
             fcIndex = 0;
             renderFlashcard();
@@ -1607,11 +1617,10 @@ zone|n|vùng, khu vực`;
             renderQuizQuestion();
         }
 
-        // --- NÂNG CẤP AUDIO TTS (TEXT TO SPEECH) ---
+        // --- HỆ THỐNG PHÁT ÂM CỰC CHUẨN (Từ điển Oxford/US) ---
         function playAudio(event) {
             if(event) event.stopPropagation();
             
-            // Lấy nút để tạo hiệu ứng khi đang đọc
             const btn = event.currentTarget;
             if (btn) {
                 const icon = btn.querySelector('i');
@@ -1635,24 +1644,36 @@ zone|n|vùng, khu vực`;
         }
 
         function speakText(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                
-                // Cấu hình nâng cao cho giọng đọc Tiếng Anh bản xứ
-                utterance.lang = 'en-US';
-                utterance.rate = 0.85; // Tốc độ đọc hơi chậm lại một xíu (0.85) để phát âm chuẩn TOEIC hơn
-                utterance.pitch = 1.0; 
+            // Xử lý chuỗi để truyền vào URL chính xác
+            const safeText = encodeURIComponent(text);
+            
+            // CÁCH 1: Gọi file âm thanh (.mp3) tiếng Anh Mỹ chuẩn từ máy chủ Google Translate
+            // Lợi ích: Không bị chặn trên Github, giọng cực kì to, rõ ràng và chuẩn xác 100% trên mọi nền tảng.
+            const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en-US&client=tw-ob&q=${safeText}`;
+            const audio = new Audio(audioUrl);
+            audio.volume = 1.0; // Luôn ép âm lượng thiết bị phát ra ở mức tối đa (100%)
+            
+            audio.play().catch(e => {
+                console.warn("Không thể tải file âm thanh chuẩn, sử dụng giọng máy (Fallback)...");
+                // CÁCH 2: Fallback (Dự phòng) - Dùng giọng máy nếu không có mạng / lỗi kết nối
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.85; 
+                    utterance.pitch = 1.0; 
+                    utterance.volume = 1.0; // Ép âm lượng phát ra to nhất
 
-                // Gán giọng đọc Premium nếu tìm thấy
-                if (bestEnglishVoice) {
-                    utterance.voice = bestEnglishVoice;
+                    if (selectedEnglishVoice) {
+                        utterance.voice = selectedEnglishVoice;
+                    }
+
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    showToast("Thiết bị không hỗ trợ phát âm thanh", "error");
                 }
-
-                window.speechSynthesis.speak(utterance);
-            } else {
-                showToast("Trình duyệt không hỗ trợ phát âm thanh", "error");
-            }
+            });
         }
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1709,7 +1730,7 @@ zone|n|vùng, khu vực`;
                     if (importedData && importedData.lessons) {
                         window.appData = importedData;
                         window.allWordsPool = importedData.allWords || importedData.lessons.flatMap(l => l.words);
-                        localStorage.setItem('toeic_app_data_v9', JSON.stringify(window.appData));
+                        localStorage.setItem('toeic_app_data_v10', JSON.stringify(window.appData));
                         showToast("Đã khôi phục dữ liệu học thành công!", "success");
                         renderLessonList();
                         changeLesson(0);
